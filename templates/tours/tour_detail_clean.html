@@ -21,7 +21,7 @@
       .tour-header {
         border-bottom: 2px solid #007bff;
         padding-bottom: 20px;
-        margin-bottom: 30px;
+        margin-body: 30px;
       }
       .tour-title {
         color: #007bff;
@@ -165,8 +165,7 @@
           <div class="info-label">⏰ Duration</div>
           <div class="info-value">{{ tour.duration }} hours</div>
         </div>
-        {% endif %}
-        {% if tour.max_participants %}
+        {% endif %} {% if tour.max_participants %}
         <div class="info-card">
           <div class="info-label">👥 Max Group Size</div>
           <div class="info-value">{{ tour.max_participants }} people</div>
@@ -187,19 +186,18 @@
 
       <div class="upcoming-dates">
         <h3 class="section-title">🎫 Upcoming Dates</h3>
-        {% if upcoming_availabilities %}
-        {% for availability in upcoming_availabilities %}
+        {% if upcoming_availabilities %} {% for availability in
+        upcoming_availabilities %}
         <div class="date-card">
           <div class="date-info">
             <div class="date-date">
               {{ availability.date|date:"F d, Y (l)" }}
             </div>
             <div class="date-details">
-              {{ availability.slots_available }} slots remaining
-              {% if availability.guide %}
-              • Guide: {% if availability.guide.user.first_name %}{{ availability.guide.user.first_name }} {{ availability.guide.user.last_name }}{% else %}{{ availability.guide.user.username }}{% endif %}
-              <!-- Template updated at {{ "now"|date:"Y-m-d H:i:s" }} -->
-              {% endif %}
+              {{ availability.slots_available }} slots remaining {% if
+              availability.guide %} • Guide: {{
+              availability.guide.user.get_full_name|default:availability.guide.user.username
+              }} {% endif %}
             </div>
           </div>
           <div>
@@ -215,8 +213,7 @@
             {% endif %}
           </div>
         </div>
-        {% endfor %}
-        {% else %}
+        {% endfor %} {% else %}
         <div class="no-dates">
           <h4>😴 No Upcoming Dates</h4>
           <p>This tour doesn't have any scheduled dates at the moment.</p>

@@ -195,11 +195,10 @@
               {{ availability.date|date:"F d, Y (l)" }}
             </div>
             <div class="date-details">
-              {{ availability.slots_available }} slots remaining
-              {% if availability.guide %}
-              • Guide: {% if availability.guide.user.first_name %}{{ availability.guide.user.first_name }} {{ availability.guide.user.last_name }}{% else %}{{ availability.guide.user.username }}{% endif %}
-              <!-- Template updated at {{ "now"|date:"Y-m-d H:i:s" }} -->
-              {% endif %}
+              {{ availability.slots_available }} slots remaining {% if
+              availability.guide %} • Guide: {{
+              availability.guide.user.get_full_name|default:availability.guide.user.username
+              }} {% endif %}
             </div>
           </div>
           <div>

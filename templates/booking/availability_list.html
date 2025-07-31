@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Available Tours - UWA Reservation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .tour-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .form-control {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+      }
+      .btn {
+        padding: 10px 15px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 3px;
+      }
+      .btn:hover {
+        background: #0056b3;
+      }
+      .search-form {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .pagination {
+        text-align: center;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Available Tours</h1>
+
+    <!-- Search Form -->
+    <div class="search-form">
+      <h3>Search Tours</h3>
+      <form method="get">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+          "
+        >
+          <div>
+            <label>From Date:</label>
+            {{ form.date_from }}
+          </div>
+          <div>
+            <label>To Date:</label>
+            {{ form.date_to }}
+          </div>
+          <div>
+            <label>Park:</label>
+            {{ form.park }}
+          </div>
+          <div>
+            <label>Min Slots:</label>
+            {{ form.min_slots }}
+          </div>
+        </div>
+        <button type="submit" class="btn">Search</button>
+        <a
+          href="{% url 'booking:availability_list' %}"
+          class="btn"
+          style="background: #6c757d"
+          >Clear</a
+        >
+      </form>
+    </div>
+
+    <!-- Tours List -->
+    {% if availabilities %} {% for availability in availabilities %}
+    <div class="tour-card">
+      <h3>{{ availability.tour.name }}</h3>
+      <p><strong>Park:</strong> {{ availability.tour.park.name }}</p>
+      <p><strong>Date:</strong> {{ availability.date }}</p>
+      <p>
+        <strong>Duration:</strong> {{ availability.tour.duration_hours }} hours
+      </p>
+      <p><strong>Price:</strong> ${{ availability.tour.price }}</p>
+      <p>
+        <strong>Available Slots:</strong> {{ availability.slots_available }}
+      </p>
+      {% if availability.guide %}
+      <p><strong>Guide:</strong> {{ availability.guide.user.username }}</p>
+      {% endif %}
+      <p>{{ availability.tour.description|truncatewords:30 }}</p>
+
+      <div>
+        <a
+          href="{% url 'booking:availability_detail' availability.id %}"
+          class="btn"
+          >View Details</a
+        >
+        {% if availability.can_book %}
+        <a
+          href="{% url 'booking:create_booking' availability.id %}"
+          class="btn"
+          style="background: #28a745"
+          >Book Now</a
+        >
+        {% else %}
+        <span style="color: #dc3545">Not Available</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+      <a
+        href="?page=1{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.park %}&park={{ request.GET.park }}{% endif %}{% if request.GET.min_slots %}&min_slots={{ request.GET.min_slots }}{% endif %}"
+        >&laquo; First</a
+      >
+      <a
+        href="?page={{ page_obj.previous_page_number }}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.park %}&park={{ request.GET.park }}{% endif %}{% if request.GET.min_slots %}&min_slots={{ request.GET.min_slots }}{% endif %}"
+        >&lsaquo; Previous</a
+      >
+      {% endif %}
+
+      <span
+        >Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span
+      >
+
+      {% if page_obj.has_next %}
+      <a
+        href="?page={{ page_obj.next_page_number }}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.park %}&park={{ request.GET.park }}{% endif %}{% if request.GET.min_slots %}&min_slots={{ request.GET.min_slots }}{% endif %}"
+        >Next &rsaquo;</a
+      >
+      <a
+        href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.park %}&park={{ request.GET.park }}{% endif %}{% if request.GET.min_slots %}&min_slots={{ request.GET.min_slots }}{% endif %}"
+        >Last &raquo;</a
+      >
+      {% endif %}
+    </div>
+    {% endif %} {% else %}
+    <p>No tours available for the selected criteria.</p>
+    {% endif %}
+
+    <div style="margin-top: 30px">
+      <a href="{% url 'booking:user_bookings' %}" class="btn">My Bookings</a>
+      <a
+        href="{% url 'tours:tour_list' %}"
+        class="btn"
+        style="background: #6c757d"
+        >Browse All Tours</a
+      >
+    </div>
+  </body>
+</html>

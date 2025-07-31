@@ -12,8 +12,15 @@ class Park(models.Model):
         return self.name
 
 class Guide(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={'profile__role': 'guide'})
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     specialization = models.CharField(max_length=100, help_text="e.g., Birding, Primates")
+    
+    def save(self, *args, **kwargs):
+        # Automatically set the user's profile role to 'guide' when creating a Guide
+        super().save(*args, **kwargs)
+        if hasattr(self.user, 'profile'):
+            self.user.profile.role = 'guide'
+            self.user.profile.save()
     
     def __str__(self):
         return f"Guide: {self.user.username}"
@@ -29,26 +36,3 @@ class Tour(models.Model):
 
     def __str__(self):
         return f"{self.name} in {self.park.name}"
-
-class Availability(models.Model):
-    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='availability')
-    date = models.DateField()
-    slots_available = models.PositiveIntegerField()
-    guide = models.ForeignKey(Guide, on_delete=models.SET_NULL, null=True, blank=True)
-
-    class Meta:
-        verbose_name_plural = "Availabilities"
-
-    def __str__(self):
-        return f"{self.tour.name} on {self.date} ({self.slots_available} slots)"
-
-class Booking(models.Model):
-    tourist = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    availability = models.ForeignKey(Availability, on_delete=models.CASCADE)
-    num_of_people = models.PositiveIntegerField()
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2)
-    booking_date = models.DateTimeField(auto_now_add=True)
-    is_paid = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Booking for {self.tourist.username} on {self.availability.tour.name}"

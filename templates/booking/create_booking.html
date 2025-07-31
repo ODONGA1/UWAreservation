@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Tour - UWA Reservation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        max-width: 800px;
+      }
+      .form-group {
+        margin: 15px 0;
+      }
+      .form-control {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+      }
+      .btn {
+        padding: 10px 15px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #0056b3;
+      }
+      .btn-secondary {
+        background: #6c757d;
+      }
+      .tour-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .error {
+        color: #dc3545;
+        font-size: 14px;
+      }
+      .success {
+        color: #28a745;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Book Your Tour</h1>
+
+    <!-- Tour Information -->
+    <div class="tour-info">
+      <h3>{{ availability.tour.name }}</h3>
+      <p><strong>Park:</strong> {{ availability.tour.park.name }}</p>
+      <p><strong>Date:</strong> {{ availability.date }}</p>
+      <p>
+        <strong>Duration:</strong> {{ availability.tour.duration_hours }} hours
+      </p>
+      <p><strong>Price per person:</strong> ${{ availability.tour.price }}</p>
+      <p>
+        <strong>Available slots:</strong> {{ availability.slots_available }}
+      </p>
+      {% if availability.guide %}
+      <p>
+        <strong>Your Guide:</strong> 
+        {% if availability.guide.user.first_name %}{{ availability.guide.user.first_name }} {{ availability.guide.user.last_name }}{% else %}{{ availability.guide.user.username }}{% endif %}
+      </p>
+      <p>
+        <strong>Specialization:</strong> {{ availability.guide.specialization }}
+      </p>
+      {% endif %}
+      <p>{{ availability.tour.description }}</p>
+    </div>
+
+    <!-- Booking Form -->
+    <form method="post" id="booking-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="{{ form.num_of_people.id_for_label }}">Number of People:</label>
+        {{ form.num_of_people }}
+        {% if form.num_of_people.errors %}
+        <div class="error">{{ form.num_of_people.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.contact_email.id_for_label }}">Contact Email:</label>
+        {{ form.contact_email }}
+        {% if form.contact_email.errors %}
+        <div class="error">{{ form.contact_email.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.contact_phone.id_for_label }}">Contact Phone (Optional):</label>
+        {{ form.contact_phone }}
+        {% if form.contact_phone.errors %}
+        <div class="error">{{ form.contact_phone.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.special_requirements.id_for_label }}">Special Requirements (Optional):</label>
+        {{ form.special_requirements }}
+        {% if form.special_requirements.errors %}
+        <div class="error">{{ form.special_requirements.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Cost Calculation -->
+      <div class="tour-info" id="cost-calculation" style="display: none">
+        <h4>Booking Summary</h4>
+        <p>
+          <strong>Number of people:</strong> <span id="people-count">1</span>
+        </p>
+        <p><strong>Price per person:</strong> ${{ availability.tour.price }}</p>
+        <p>
+          <strong>Total cost:</strong> $<span id="total-cost"
+            >{{ availability.tour.price }}</span
+          >
+        </p>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+
+      <div class="form-group">
+        <button type="submit" class="btn">Create Booking</button>
+        <a
+          href="{% url 'booking:availability_detail' availability.id %}"
+          class="btn btn-secondary"
+          >Cancel</a
+        >
+      </div>
+    </form>
+
+    <script>
+      // Real-time cost calculation
+      const numPeopleInput = document.getElementById('{{ form.num_of_people.id_for_label }}');
+      const costCalculation = document.getElementById('cost-calculation');
+      const peopleCount = document.getElementById('people-count');
+      const totalCost = document.getElementById('total-cost');
+      const pricePerPerson = {{ availability.tour.price }};
+
+      function updateCost() {
+          const numPeople = parseInt(numPeopleInput.value) || 1;
+          peopleCount.textContent = numPeople;
+          totalCost.textContent = (numPeople * pricePerPerson).toFixed(2);
+
+          if (numPeople > 0) {
+              costCalculation.style.display = 'block';
+          } else {
+              costCalculation.style.display = 'none';
+          }
+      }
+
+      numPeopleInput.addEventListener('input', updateCost);
+
+      // Initial calculation
+      updateCost();
+    </script>
+  </body>
+</html>

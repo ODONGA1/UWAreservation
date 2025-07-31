@@ -37,8 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'anymail',  # Email service - disabled for testing
     'tours',
     'accounts',
+    'booking',
+    # 'communications',  # Disabled for testing
 ]
 
 MIDDLEWARE = [
@@ -122,3 +125,45 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email Configuration using django-anymail
+# Temporarily disabled for testing core functionality
+# from decouple import config
+
+# Email backend configuration
+# EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"  # Example with Mailgun
+# EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"  # Alternative: SendGrid
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # For development
+
+# Anymail settings (configure based on your email service)
+# ANYMAIL = {
+#     "MAILGUN_API_KEY": config('MAILGUN_API_KEY', default='your-mailgun-api-key'),
+#     "MAILGUN_SENDER_DOMAIN": config('MAILGUN_DOMAIN', default='your-domain.com'),
+# }
+
+# Default email settings
+DEFAULT_FROM_EMAIL = 'noreply@uwa-tours.com'  # config('DEFAULT_FROM_EMAIL', default='noreply@uwa-tours.com')
+EMAIL_SUBJECT_PREFIX = '[UWA Tours] '
+
+# SMS Configuration using Twilio
+# TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='your-twilio-sid')
+# TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='your-twilio-token')
+# TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='+1234567890')
+
+# Celery Configuration for background tasks - disabled for testing
+# CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+# CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = TIME_ZONE
+
+# Communication settings - disabled for testing
+# SEND_NOTIFICATIONS = config('SEND_NOTIFICATIONS', default=True, cast=bool)
+# NOTIFICATION_FROM_EMAIL = config('NOTIFICATION_FROM_EMAIL', default=DEFAULT_FROM_EMAIL)
+# NOTIFICATION_FROM_PHONE = config('NOTIFICATION_FROM_PHONE', default=TWILIO_PHONE_NUMBER)
+
+# Authentication settings
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

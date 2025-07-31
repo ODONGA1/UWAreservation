@@ -19,5 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('tours/', include('tours.urls')),
+    path('', include('tours.urls')),  # Root URL goes to tours
+    path('booking/', include('booking.urls')),
+    path('accounts/', include('accounts.urls')),  # Authentication URLs
 ]

@@ -1,17 +1,246 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Our Tours</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UWA Tours - Wildlife Adventures</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 30px;
+        background: linear-gradient(135deg, #007bff, #28a745);
+        color: white;
+        border-radius: 10px;
+      }
+      .tours-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+      .tour-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .tour-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+      .tour-image {
+        height: 200px;
+        background: linear-gradient(45deg, #007bff, #28a745);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3em;
+      }
+      .tour-content {
+        padding: 25px;
+      }
+      .tour-title {
+        color: #007bff;
+        margin: 0 0 10px 0;
+        font-size: 1.5em;
+      }
+      .tour-title a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .tour-title a:hover {
+        text-decoration: underline;
+      }
+      .tour-info {
+        color: #6c757d;
+        margin-bottom: 15px;
+      }
+      .tour-description {
+        color: #495057;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+      .tour-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+      }
+      .price {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: #28a745;
+      }
+      .availability {
+        text-align: right;
+      }
+      .availability-status {
+        font-size: 0.9em;
+        color: #6c757d;
+      }
+      .availability-next {
+        font-weight: bold;
+        color: #007bff;
+      }
+      .tour-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .btn {
+        flex: 1;
+        padding: 12px 20px;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+      .btn-primary {
+        background-color: #007bff;
+        color: white;
+      }
+      .btn-primary:hover {
+        background-color: #0056b3;
+      }
+      .btn-success {
+        background-color: #28a745;
+        color: white;
+      }
+      .btn-success:hover {
+        background-color: #218838;
+      }
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+      .btn-secondary:hover {
+        background-color: #545b62;
+      }
+      .navigation {
+        text-align: center;
+        margin: 40px 0;
+      }
+      .nav-link {
+        display: inline-block;
+        margin: 0 15px;
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .nav-link:hover {
+        background: #0056b3;
+      }
+    </style>
   </head>
   <body>
-    <h1>Explore Our Tours</h1>
-    {% for tour in tours %}
-    <div>
-      <h2><a href="{% url 'tour_detail' tour.id %}">{{ tour.name }}</a></h2>
-      <p>in {{ tour.park.name }}</p>
-      <p>Price: ${{ tour.price }}</p>
+    <div class="container">
+      <div class="header">
+        <h1>🦁 UWA Wildlife Tours</h1>
+        <p>Discover Uganda's Amazing Wildlife Adventures</p>
+      </div>
+
+      <div class="navigation">
+        <a href="{% url 'tours:tour_list' %}" class="nav-link">🏠 All Tours</a>
+        <a href="{% url 'booking:user_bookings' %}" class="nav-link"
+          >📋 My Bookings</a
+        >
+        <a href="{% url 'admin:index' %}" class="nav-link">⚙️ Admin</a>
+      </div>
+
+      <div class="tours-grid">
+        {% for tour in tours %}
+        <div class="tour-card">
+          {% if tour.image %}
+          <img
+            src="{{ tour.image.url }}"
+            alt="{{ tour.name }}"
+            class="tour-image"
+          />
+          {% else %}
+          <div class="tour-image">🦁</div>
+          {% endif %}
+
+          <div class="tour-content">
+            <h2 class="tour-title">
+              <a href="{% url 'tours:tour_detail' tour.id %}"
+                >{{ tour.name }}</a
+              >
+            </h2>
+
+            <div class="tour-info">
+              📍 {{ tour.park.name }} {% if tour.duration %} • ⏰ {{ tour.duration }} hours {% endif %} {% if tour.max_participants %} • 👥 Max {{ tour.max_participants }} people {% endif %}
+            </div>
+
+            {% if tour.description %}
+            <div class="tour-description">
+              {{ tour.description|truncatewords:25 }}
+            </div>
+            {% endif %}
+
+            <div class="tour-meta">
+              <div class="price">${{ tour.price }}</div>
+              <div class="availability">
+                {% if tour.next_available %}
+                <div class="availability-next">
+                  Next: {{ tour.next_available.date|date:"M d" }}
+                </div>
+                <div class="availability-status">
+                  {{ tour.total_upcoming }} dates available
+                </div>
+                {% else %}
+                <div class="availability-status" style="color: #dc3545">
+                  No upcoming dates
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="tour-actions">
+              <a
+                href="{% url 'tours:tour_detail' tour.id %}"
+                class="btn btn-primary"
+              >
+                📋 View Details
+              </a>
+              {% if tour.next_available %}
+              <a
+                href="{% url 'tours:tour_booking' tour.id %}"
+                class="btn btn-success"
+              >
+                🎫 Book Now
+              </a>
+              {% else %}
+              <button class="btn btn-secondary" disabled>
+                😴 Not Available
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 40px; color: #6c757d">
+          <h3>No tours available</h3>
+          <p>Check back later for exciting wildlife adventures!</p>
+        </div>
+        {% endfor %}
+      </div>
     </div>
-    <hr />
-    {% endfor %}
   </body>
 </html>

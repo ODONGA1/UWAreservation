@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Process Payment - UWA Reservation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #28a745;
+      }
+      .payment-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #495057;
+      }
+      .info-value {
+        color: #212529;
+      }
+      .total-amount {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #28a745;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+        margin-top: 10px;
+      }
+      .payment-method {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+      .payment-method-name {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #1976d2;
+      }
+      .processing {
+        text-align: center;
+        margin: 30px 0;
+      }
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #007bff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .status-pending {
+        color: #ffc107;
+        font-weight: bold;
+      }
+      .status-processing {
+        color: #17a2b8;
+        font-weight: bold;
+      }
+      .status-completed {
+        color: #28a745;
+        font-weight: bold;
+      }
+      .status-failed {
+        color: #dc3545;
+        font-weight: bold;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+        margin: 5px;
+      }
+      .btn-primary {
+        background-color: #007bff;
+        color: white;
+      }
+      .btn-primary:hover {
+        background-color: #0056b3;
+      }
+      .btn-success {
+        background-color: #28a745;
+        color: white;
+      }
+      .btn-success:hover {
+        background-color: #218838;
+      }
+      .btn-danger {
+        background-color: #dc3545;
+        color: white;
+      }
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+      .btn-secondary:hover {
+        background-color: #545b62;
+      }
+      .actions {
+        text-align: center;
+        margin-top: 30px;
+      }
+      .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>💳 Process Payment</h1>
+        <p>Complete your booking payment</p>
+      </div>
+
+      <div class="payment-info">
+        <h3>Payment Details</h3>
+        <div class="info-row">
+          <span class="info-label">Booking ID:</span>
+          <span class="info-value">{{ payment.booking.booking_id }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Payment ID:</span>
+          <span class="info-value">{{ payment.payment_id }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tour:</span>
+          <span class="info-value"
+            >{{ payment.booking.availability.tour.name }}</span
+          >
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <span class="info-value"
+            >{{ payment.booking.availability.date|date:"F d, Y" }}</span
+          >
+        </div>
+        <div class="info-row total-amount">
+          <span class="info-label">Amount:</span>
+          <span class="info-value"
+            >${{ payment.amount }} {{ payment.currency }}</span
+          >
+        </div>
+      </div>
+
+      <div class="payment-method">
+        <div class="payment-method-name">
+          {% if payment.payment_method == 'pesapal' %}
+            🏦 Pesapal
+          {% elif payment.payment_method == 'dpo' %}
+            💳 DPO Group
+          {% elif payment.payment_method == 'mpesa' %}
+            📱 M-Pesa
+          {% elif payment.payment_method == 'card' %}
+            💳 Credit/Debit Card
+          {% elif payment.payment_method == 'cash' %}
+            💵 Cash Payment
+          {% else %}
+            {{ payment.get_payment_method_display }}
+          {% endif %}
+        </div>
+      </div>
+
+      {% if payment.status == 'pending' %}
+      <div class="alert alert-info">
+        <strong>💡 Payment Pending:</strong> Your payment is waiting to be
+        processed.
+      </div>
+      {% elif payment.status == 'processing' %}
+      <div class="processing">
+        <div class="spinner"></div>
+        <p>Processing your payment...</p>
+      </div>
+      <div class="alert alert-warning">
+        <strong>⏳ Processing:</strong> Please do not close this window while we
+        process your payment.
+      </div>
+      {% elif payment.status == 'completed' %}
+      <div class="alert alert-success">
+        <strong>✅ Payment Successful!</strong> Your booking has been confirmed.
+        You will receive a confirmation email shortly.
+      </div>
+      {% elif payment.status == 'failed' %}
+      <div class="alert alert-danger">
+        <strong>❌ Payment Failed:</strong> There was an issue processing your payment. Please try again or contact support.
+        {% if payment.failure_reason %}
+          <br /><em>Reason: {{ payment.failure_reason }}</em>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="payment-info">
+        <div class="info-row">
+          <span class="info-label">Status:</span>
+          <span class="info-value status-{{ payment.status }}">
+            {{ payment.get_status_display }}
+          </span>
+        </div>
+        {% if payment.transaction_id %}
+        <div class="info-row">
+          <span class="info-label">Transaction ID:</span>
+          <span class="info-value">{{ payment.transaction_id }}</span>
+        </div>
+        {% endif %}
+        <div class="info-row">
+          <span class="info-label">Created:</span>
+          <span class="info-value"
+            >{{ payment.created_at|date:"F d, Y H:i" }}</span
+          >
+        </div>
+        {% if payment.processed_at %}
+        <div class="info-row">
+          <span class="info-label">Processed:</span>
+          <span class="info-value"
+            >{{ payment.processed_at|date:"F d, Y H:i" }}</span
+          >
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="actions">
+        {% if payment.status == 'completed' %}
+        <a
+          href="{% url 'booking:booking_detail' payment.booking.booking_id %}"
+          class="btn btn-success"
+        >
+          ✅ View Booking Details
+        </a>
+        <a href="{% url 'booking:user_bookings' %}" class="btn btn-primary">
+          📋 My Bookings
+        </a>
+        {% elif payment.status == 'failed' %}
+        <a
+          href="{% url 'booking:payment_selection' payment.booking.booking_id %}"
+          class="btn btn-primary"
+        >
+          🔄 Try Again
+        </a>
+        <a
+          href="{% url 'booking:booking_detail' payment.booking.booking_id %}"
+          class="btn btn-secondary"
+        >
+          ← Back to Booking
+        </a>
+        {% elif payment.status == 'processing' %}
+        <button class="btn btn-secondary" disabled>⏳ Processing...</button>
+        <a
+          href="{% url 'booking:booking_detail' payment.booking.booking_id %}"
+          class="btn btn-secondary"
+        >
+          ← Back to Booking
+        </a>
+        {% else %}
+        <button onclick="processPayment()" class="btn btn-primary">
+          💳 Complete Payment
+        </button>
+        <a
+          href="{% url 'booking:payment_selection' payment.booking.booking_id %}"
+          class="btn btn-secondary"
+        >
+          ← Change Payment Method
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      function processPayment() {
+          // In a real implementation, this would integrate with the payment gateway
+          alert('Payment processing would be handled by the payment gateway integration.');
+
+          // For demonstration, you could redirect to a payment gateway or show a processing state
+          // Example: window.location.href = 'https://payment-gateway.com/process/' + paymentId;
+      }
+
+      // Auto-refresh for processing payments
+      {% if payment.status == 'processing' %}
+      setTimeout(function() {
+          location.reload();
+      }, 5000); // Refresh every 5 seconds
+      {% endif %}
+    </script>
+  </body>
+</html>

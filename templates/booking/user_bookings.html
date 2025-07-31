@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Bookings - UWA Reservation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .booking-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .status-pending {
+        color: #ffc107;
+        font-weight: bold;
+      }
+      .status-confirmed {
+        color: #28a745;
+        font-weight: bold;
+      }
+      .status-cancelled {
+        color: #dc3545;
+        font-weight: bold;
+      }
+      .status-completed {
+        color: #007bff;
+        font-weight: bold;
+      }
+      .btn {
+        padding: 8px 12px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 3px;
+        margin: 2px;
+      }
+      .btn:hover {
+        background: #0056b3;
+      }
+      .btn-small {
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+      .pagination {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .no-bookings {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>My Bookings</h1>
+
+    {% if bookings %}
+      {% for booking in bookings %}
+      <div class="booking-card">
+        <div style="display: flex; justify-content: space-between; align-items: start;">
+          <div style="flex: 1">
+            <h3>{{ booking.availability.tour.name }}</h3>
+            <p><strong>Park:</strong> {{ booking.availability.tour.park.name }}</p>
+            <p><strong>Date:</strong> {{ booking.availability.date }}</p>
+            <p><strong>People:</strong> {{ booking.num_of_people }}</p>
+            <p><strong>Total Cost:</strong> ${{ booking.total_cost }}</p>
+            <p>
+              <strong>Booking Status:</strong>
+              <span class="status-{{ booking.booking_status }}">{{ booking.get_booking_status_display }}</span>
+            </p>
+            <p>
+              <strong>Payment Status:</strong>
+              <span class="status-{{ booking.payment_status }}">{{ booking.get_payment_status_display }}</span>
+            </p>
+            <p><strong>Booked:</strong> {{ booking.booking_date|date:"M d, Y" }}</p>
+          </div>
+
+          <div style="text-align: right">
+            <div>
+              <a href="{% url 'booking:booking_detail' booking.booking_id %}" class="btn btn-small">View Details</a>
+            </div>
+
+            {% if booking.booking_status == 'pending' and booking.payment_status == 'pending' %}
+            <div style="margin-top: 5px">
+              <a href="{% url 'booking:payment_selection' booking.booking_id %}" class="btn btn-small" style="background: #28a745">Pay Now</a>
+            </div>
+            {% endif %}
+            
+            {% if booking.can_cancel %}
+            <div style="margin-top: 5px">
+              <a href="{% url 'booking:cancel_booking' booking.booking_id %}" class="btn btn-small" style="background: #dc3545">Cancel</a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Quick Status Indicators -->
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 12px; color: #6c757d;">
+          Booking #{{ booking.booking_id|truncatechars:13 }}
+          {% if booking.availability.date < today %}
+          - <span style="color: #6c757d">Past Tour</span>
+          {% elif booking.availability.date == today %}
+          - <span style="color: #ffc107">Today!</span>
+          {% else %}
+          - {{ booking.availability.date|timeuntil }} to go
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; First</a>
+        <a href="?page={{ page_obj.previous_page_number }}">&lsaquo; Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Next &rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        {% endif %}
+      </div>
+      {% endif %}
+      
+    {% else %}
+      <div class="no-bookings">
+        <h3>No bookings found</h3>
+        <p>You haven't made any bookings yet.</p>
+        <a href="{% url 'booking:availability_list' %}" class="btn">Browse Available Tours</a>
+      </div>
+    {% endif %}
+
+    <div style="margin-top: 30px; text-align: center">
+      <a href="{% url 'booking:availability_list' %}" class="btn"
+        >Book New Tour</a
+      >
+      <a
+        href="{% url 'tours:tour_list' %}"
+        class="btn"
+        style="background: #6c757d"
+        >Browse All Tours</a
+      >
+    </div>
+  </body>
+</html>

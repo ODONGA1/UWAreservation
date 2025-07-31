@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cancel Booking - UWA Reservation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #dc3545;
+      }
+      .booking-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #495057;
+      }
+      .info-value {
+        color: #212529;
+      }
+      .warning {
+        background: #fff3cd;
+        color: #856404;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #ffeaa7;
+        margin-bottom: 30px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+        margin: 5px;
+      }
+      .btn-danger {
+        background-color: #dc3545;
+        color: white;
+      }
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+      .btn-secondary:hover {
+        background-color: #545b62;
+      }
+      .actions {
+        text-align: center;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Cancel Booking</h1>
+        <p>Are you sure you want to cancel this booking?</p>
+      </div>
+
+      <div class="booking-info">
+        <h3>Booking Details</h3>
+        <div class="info-row">
+          <span class="info-label">Booking ID:</span>
+          <span class="info-value">{{ booking.booking_id }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tour:</span>
+          <span class="info-value">{{ booking.availability.tour.name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <span class="info-value"
+            >{{ booking.availability.date|date:"F d, Y" }}</span
+          >
+        </div>
+        <div class="info-row">
+          <span class="info-label">Number of People:</span>
+          <span class="info-value">{{ booking.num_of_people }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Total Cost:</span>
+          <span class="info-value">${{ booking.total_cost }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status:</span>
+          <span class="info-value"
+            >{{ booking.get_booking_status_display }}</span
+          >
+        </div>
+      </div>
+
+      {% if booking.can_cancel %}
+        <div class="warning">
+          <strong>⚠️ Warning:</strong> Canceling this booking will free up the slots for other customers.
+          {% if booking.booking_status == 'confirmed' %}
+            Please review our cancellation policy regarding refunds.
+          {% endif %}
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+
+          <div class="actions">
+            <button type="submit" class="btn btn-danger">
+              ❌ Yes, Cancel This Booking
+            </button>
+            <a href="{% url 'booking:booking_detail' booking.booking_id %}" class="btn btn-secondary">
+              ← Keep Booking
+            </a>
+          </div>
+        </form>
+      {% else %}
+        <div class="warning">
+          <strong>⚠️ Cannot Cancel:</strong> This booking cannot be cancelled because
+          {% if booking.availability.is_past_date %}
+            the tour date has already passed.
+          {% elif booking.booking_status == 'cancelled' %}
+            it has already been cancelled.
+          {% elif booking.booking_status == 'completed' %}
+            it has already been completed.
+          {% else %}
+            of its current status.
+          {% endif %}
+        </div>
+
+        <div class="actions">
+          <a href="{% url 'booking:booking_detail' booking.booking_id %}" class="btn btn-secondary">
+            ← Back to Booking Details
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

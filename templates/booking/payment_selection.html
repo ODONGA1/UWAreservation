@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Selection - UWA Reservation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #28a745;
+      }
+      .booking-summary {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #495057;
+      }
+      .info-value {
+        color: #212529;
+      }
+      .total-cost {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #28a745;
+        border-top: 1px solid #dee2e6;
+        padding-top: 10px;
+        margin-top: 10px;
+      }
+      .payment-methods {
+        margin-bottom: 30px;
+      }
+      .payment-option {
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .payment-option:hover {
+        border-color: #007bff;
+        background-color: #f8f9fa;
+      }
+      .payment-option.selected {
+        border-color: #007bff;
+        background-color: #e3f2fd;
+      }
+      .payment-option input[type="radio"] {
+        margin-right: 10px;
+      }
+      .payment-icon {
+        font-size: 1.5em;
+        margin-right: 10px;
+      }
+      .payment-name {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .payment-description {
+        color: #6c757d;
+        font-size: 0.9em;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+        margin: 5px;
+      }
+      .btn-success {
+        background-color: #28a745;
+        color: white;
+      }
+      .btn-success:hover {
+        background-color: #218838;
+      }
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+      .btn-secondary:hover {
+        background-color: #545b62;
+      }
+      .actions {
+        text-align: center;
+        margin-top: 30px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>💳 Payment Selection</h1>
+        <p>Choose your preferred payment method</p>
+      </div>
+
+      <div class="booking-summary">
+        <h3>Booking Summary</h3>
+        <div class="info-row">
+          <span class="info-label">Tour:</span>
+          <span class="info-value">{{ booking.availability.tour.name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <span class="info-value"
+            >{{ booking.availability.date|date:"F d, Y" }}</span
+          >
+        </div>
+        <div class="info-row">
+          <span class="info-label">Number of People:</span>
+          <span class="info-value">{{ booking.num_of_people }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Price per Person:</span>
+          <span class="info-value">${{ booking.unit_price }}</span>
+        </div>
+        <div class="info-row total-cost">
+          <span class="info-label">Total Amount:</span>
+          <span class="info-value">${{ booking.total_cost }}</span>
+        </div>
+      </div>
+
+      <form method="post" id="payment-form">
+        {% csrf_token %}
+
+        <div class="payment-methods">
+          <h3>Select Payment Method</h3>
+
+          <div class="form-group">
+            {{ form.payment_method.errors }}
+            {% for choice in form.payment_method %}
+            <div
+              class="payment-option"
+              onclick="selectPayment('{{ choice.choice_value }}')"
+            >
+              {{ choice.tag }}
+              <div class="payment-details">
+                {% if choice.choice_value == 'pesapal' %}
+                <span class="payment-icon">🏦</span>
+                <div class="payment-name">Pesapal</div>
+                <div class="payment-description">
+                  Mobile money, bank transfers, and cards
+                </div>
+                {% elif choice.choice_value == 'dpo' %}
+                <span class="payment-icon">💳</span>
+                <div class="payment-name">DPO Group</div>
+                <div class="payment-description">
+                  International credit and debit cards
+                </div>
+                {% elif choice.choice_value == 'mpesa' %}
+                <span class="payment-icon">📱</span>
+                <div class="payment-name">M-Pesa</div>
+                <div class="payment-description">Mobile money payment</div>
+                {% elif choice.choice_value == 'card' %}
+                <span class="payment-icon">💳</span>
+                <div class="payment-name">Credit/Debit Card</div>
+                <div class="payment-description">
+                  Visa, Mastercard, and other major cards
+                </div>
+                {% elif choice.choice_value == 'cash' %}
+                <span class="payment-icon">💵</span>
+                <div class="payment-name">Cash Payment</div>
+                <div class="payment-description">
+                  Pay in person at our office
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-success">
+            💳 Proceed to Payment
+          </button>
+          <a
+            href="{% url 'booking:booking_detail' booking.booking_id %}"
+            class="btn btn-secondary"
+          >
+            ← Back to Booking
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      function selectPayment(value) {
+        // Remove selected class from all options
+        document.querySelectorAll(".payment-option").forEach((option) => {
+          option.classList.remove("selected");
+        });
+
+        // Add selected class to clicked option
+        event.currentTarget.classList.add("selected");
+
+        // Select the radio button
+        document.querySelector(`input[value="${value}"]`).checked = true;
+      }
+
+      // Add click handlers to radio buttons
+      document
+        .querySelectorAll('input[name="payment_method"]')
+        .forEach((radio) => {
+          radio.addEventListener("change", function () {
+            document.querySelectorAll(".payment-option").forEach((option) => {
+              option.classList.remove("selected");
+            });
+            this.closest(".payment-option").classList.add("selected");
+          });
+        });
+    </script>
+  </body>
+</html>

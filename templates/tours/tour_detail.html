@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ tour.name }}</title>
+  </head>
+  <body>
+    <h1>{{ tour.name }}</h1>
+    <h3>Located in: {{ tour.park.name }}</h3>
+    <p>{{ tour.description }}</p>
+    <p><strong>Price:</strong> ${{ tour.price }}</p>
+    <p><strong>Duration:</strong> {{ tour.duration_hours }} hours</p>
+
+    <!-- Booking form will go here in the next step -->
+    <a href="{% url 'tour_list' %}">Back to all tours</a>
+  </body>
+</html>

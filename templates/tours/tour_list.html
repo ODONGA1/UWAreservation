@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Our Tours</title>
+  </head>
+  <body>
+    <h1>Explore Our Tours</h1>
+    {% for tour in tours %}
+    <div>
+      <h2><a href="{% url 'tour_detail' tour.id %}">{{ tour.name }}</a></h2>
+      <p>in {{ tour.park.name }}</p>
+      <p>Price: ${{ tour.price }}</p>
+    </div>
+    <hr />
+    {% endfor %}
+  </body>
+</html>

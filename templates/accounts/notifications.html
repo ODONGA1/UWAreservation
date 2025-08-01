@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications | UWA Wildlife Tours{% endblock %}
+{% block description %}View and manage your notifications from UWA Wildlife Tours.{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="font-display text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
+                    <p class="text-gray-600">Stay updated with your tour bookings and activities</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="mark-all-read" class="text-sm text-safari-600 hover:text-safari-700 font-medium">
+                        Mark all as read
+                    </button>
+                    <a href="{% url 'accounts:notification_settings' %}" class="bg-safari-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-safari-700 transition-colors">
+                        Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div id="notifications-container">
+                <!-- Loading state -->
+                <div id="loading-notifications" class="p-12 text-center">
+                    <div class="animate-spin w-8 h-8 border-2 border-safari-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p class="text-gray-500">Loading your notifications...</p>
+                </div>
+
+                <!-- Notifications list will be populated here -->
+                <div id="notifications-content" class="hidden">
+                    <!-- Content loaded by JavaScript -->
+                </div>
+
+                <!-- Empty state -->
+                <div id="empty-notifications" class="p-12 text-center hidden">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="bell-off" class="w-8 h-8 text-gray-400"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">No notifications</h3>
+                    <p class="text-gray-600 mb-6">You're all caught up! Check back later for updates.</p>
+                    <a href="{% url 'tours:tour_list' %}" class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 inline-flex items-center space-x-2">
+                        <i data-lucide="binoculars" class="w-4 h-4"></i>
+                        <span>Browse Tours</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotifications();
+    
+    function loadNotifications() {
+        fetch('{% url "accounts:get_notifications" %}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('loading-notifications').classList.add('hidden');
+                
+                if (data.success === false) {
+                    // Handle API error
+                    document.getElementById('loading-notifications').classList.remove('hidden');
+                    document.getElementById('loading-notifications').innerHTML = 
+                        `<div class="p-12 text-center">
+                            <p class="text-red-500 mb-2">Error: ${data.error || 'Failed to load notifications'}</p>
+                            <button onclick="location.reload()" class="text-safari-600 hover:text-safari-700 underline">Try again</button>
+                        </div>`;
+                } else if (data.notifications && data.notifications.length > 0) {
+                    displayNotifications(data.notifications);
+                    document.getElementById('notifications-content').classList.remove('hidden');
+                } else {
+                    document.getElementById('empty-notifications').classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                document.getElementById('loading-notifications').innerHTML = 
+                    `<div class="p-12 text-center">
+                        <p class="text-red-500 mb-2">Failed to load notifications</p>
+                        <p class="text-sm text-gray-500 mb-4">${error.message}</p>
+                        <button onclick="location.reload()" class="text-safari-600 hover:text-safari-700 underline">Try again</button>
+                    </div>`;
+            });
+    }
+    
+    function displayNotifications(notifications) {
+        const notificationsHtml = notifications.map((notification, index) => `
+            <div class="notification-item border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+                <a href="${notification.url}" class="block p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 ${notification.bg_color} rounded-full flex items-center justify-center">
+                                <i data-lucide="${notification.icon}" class="w-6 h-6 ${notification.color}"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">${notification.title}</h3>
+                                    <p class="text-gray-600 mb-2">${notification.message}</p>
+                                    <p class="text-sm text-gray-400">${notification.time}</p>
+                                </div>
+                                <div class="flex-shrink-0 ml-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${notification.bg_color} ${notification.color}">
+                                        ${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        `).join('');
+        
+        document.getElementById('notifications-content').innerHTML = notificationsHtml;
+        lucide.createIcons();
+    }
+    
+    // Mark all as read functionality
+    document.getElementById('mark-all-read').addEventListener('click', function() {
+        // In a real app, this would make an API call
+        const notificationItems = document.querySelectorAll('.notification-item');
+        notificationItems.forEach(item => {
+            item.style.opacity = '0.6';
+        });
+        
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}Notification Settings - {{ user.get_full_name|default:user.username }} | UWA Wildlife Tours{% endblock %}
+{% block description %}Manage your notification preferences for bookings, promotions, and updates.{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="bg-gradient-to-br from-safari-600 via-wildlife-600 to-safari-700 text-white py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center space-x-4 mb-6">
+            <a href="{% url 'accounts:profile' %}" class="flex items-center space-x-2 text-white/80 hover:text-white transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span>Back to Profile</span>
+            </a>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <i data-lucide="bell" class="w-8 h-8 text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-display text-3xl md:text-4xl font-bold mb-2">Notification Settings</h1>
+                <p class="text-white/90 text-lg">Customize how you receive updates and communications</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Settings Form -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <form method="post" class="space-y-8">
+                {% csrf_token %}
+                
+                <!-- Email Notifications -->
+                <div>
+                    <h2 class="font-display text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
+                        <i data-lucide="mail" class="w-6 h-6 text-safari-600"></i>
+                        <span>Email Notifications</span>
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Booking Notifications -->
+                        <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center h-5">
+                                <input id="email_bookings" name="email_bookings" type="checkbox" 
+                                       {% if settings.email_bookings %}checked{% endif %}
+                                       class="w-5 h-5 text-safari-600 bg-gray-100 border-gray-300 rounded focus:ring-safari-500 focus:ring-2">
+                            </div>
+                            <div class="flex-1">
+                                <label for="email_bookings" class="font-medium text-gray-900 cursor-pointer">
+                                    Booking Confirmations & Updates
+                                </label>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Receive important updates about your bookings, confirmations, cancellations, and tour changes.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Promotional Emails -->
+                        <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center h-5">
+                                <input id="email_promotions" name="email_promotions" type="checkbox" 
+                                       {% if settings.email_promotions %}checked{% endif %}
+                                       class="w-5 h-5 text-safari-600 bg-gray-100 border-gray-300 rounded focus:ring-safari-500 focus:ring-2">
+                            </div>
+                            <div class="flex-1">
+                                <label for="email_promotions" class="font-medium text-gray-900 cursor-pointer">
+                                    Promotions & New Tours
+                                </label>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Get notified about special offers, new tour announcements, and exclusive deals.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Tour Reminders -->
+                        <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center h-5">
+                                <input id="email_reminders" name="email_reminders" type="checkbox" 
+                                       {% if settings.email_reminders %}checked{% endif %}
+                                       class="w-5 h-5 text-safari-600 bg-gray-100 border-gray-300 rounded focus:ring-safari-500 focus:ring-2">
+                            </div>
+                            <div class="flex-1">
+                                <label for="email_reminders" class="font-medium text-gray-900 cursor-pointer">
+                                    Tour Reminders & Preparation Tips
+                                </label>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Receive helpful reminders before your tours, including packing lists and meeting point details.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- General Updates -->
+                        <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center h-5">
+                                <input id="email_updates" name="email_updates" type="checkbox" 
+                                       {% if settings.email_updates %}checked{% endif %}
+                                       class="w-5 h-5 text-safari-600 bg-gray-100 border-gray-300 rounded focus:ring-safari-500 focus:ring-2">
+                            </div>
+                            <div class="flex-1">
+                                <label for="email_updates" class="font-medium text-gray-900 cursor-pointer">
+                                    General Updates & Newsletter
+                                </label>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Stay informed about wildlife conservation news, park updates, and our monthly newsletter.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SMS Notifications -->
+                <div class="border-t border-gray-200 pt-8">
+                    <h2 class="font-display text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
+                        <i data-lucide="message-square" class="w-6 h-6 text-safari-600"></i>
+                        <span>SMS Notifications</span>
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- SMS Reminders -->
+                        <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center h-5">
+                                <input id="sms_reminders" name="sms_reminders" type="checkbox" 
+                                       {% if settings.sms_reminders %}checked{% endif %}
+                                       class="w-5 h-5 text-safari-600 bg-gray-100 border-gray-300 rounded focus:ring-safari-500 focus:ring-2">
+                            </div>
+                            <div class="flex-1">
+                                <label for="sms_reminders" class="font-medium text-gray-900 cursor-pointer">
+                                    Tour Reminders via SMS
+                                </label>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Receive SMS reminders 24 hours before your scheduled tours.
+                                    {% if not user.profile.phone_number %}
+                                        <span class="text-orange-600 font-medium">
+                                            Please add your phone number in your <a href="{% url 'accounts:edit_profile' %}" class="underline">profile settings</a> to enable SMS notifications.
+                                        </span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Important Notice -->
+                <div class="bg-gradient-to-r from-safari-50 to-wildlife-50 border border-safari-200 rounded-lg p-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i data-lucide="info" class="w-5 h-5 text-safari-600"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-safari-800">Important Notice</h3>
+                            <div class="mt-2 text-sm text-safari-700">
+                                <p>
+                                    Critical booking confirmations and safety updates will always be sent regardless of your preferences.
+                                    You can unsubscribe from promotional emails at any time using the link in our emails.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-6">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-safari-600 to-wildlife-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                        <span>Save Preferences</span>
+                    </button>
+                    <a href="{% url 'accounts:profile' %}" class="flex-1 border-2 border-gray-300 text-gray-600 py-3 px-6 rounded-lg font-semibold hover:border-safari-600 hover:text-safari-600 transition-all duration-200 text-center flex items-center justify-center space-x-2">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                        <span>Cancel</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Add interactivity to checkboxes
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const container = this.closest('.bg-gray-50');
+                if (this.checked) {
+                    container.classList.add('bg-safari-50', 'border', 'border-safari-200');
+                    container.classList.remove('bg-gray-50');
+                } else {
+                    container.classList.remove('bg-safari-50', 'border', 'border-safari-200');
+                    container.classList.add('bg-gray-50');
+                }
+            });
+            
+            // Initialize state
+            const container = checkbox.closest('.bg-gray-50, .bg-safari-50');
+            if (checkbox.checked) {
+                container.classList.add('bg-safari-50', 'border', 'border-safari-200');
+                container.classList.remove('bg-gray-50');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -74,7 +74,7 @@ def availability_detail(request, availability_id):
 
 @login_required
 def create_booking(request, availability_id):
-    """Create a new booking"""
+    """Create a new booking with modern interface"""
     availability = get_object_or_404(Availability, id=availability_id)
     
     if not availability.can_book_for(1):
@@ -109,7 +109,7 @@ def create_booking(request, availability_id):
         'form': form,
         'availability': availability,
     }
-    return render(request, 'booking/create_booking.html', context)
+    return render(request, 'booking/create_booking_modern.html', context)
 
 
 @login_required
@@ -134,12 +134,12 @@ def booking_detail(request, booking_id):
         'booking': booking,
         'payment': payment,
     }
-    return render(request, 'booking/booking_detail.html', context)
+    return render(request, 'booking/booking_detail_modern.html', context)
 
 
 @login_required
 def user_bookings(request):
-    """List all bookings for the current user"""
+    """List all bookings for the current user with modern template"""
     bookings = Booking.objects.filter(
         tourist=request.user
     ).select_related(
@@ -155,7 +155,7 @@ def user_bookings(request):
         'page_obj': page_obj,
         'bookings': page_obj,
     }
-    return render(request, 'booking/user_bookings.html', context)
+    return render(request, 'booking/user_bookings_modern.html', context)
 
 
 @login_required

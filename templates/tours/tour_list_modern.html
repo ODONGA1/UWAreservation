@@ -1,0 +1,805 @@
+{% extends 'base.html' %}
+
+{% block title %}Wildlife Tours - Discover Uganda's Natural Wonders{% endblock %}
+{% block description %}Explore Uganda's magnificent wildlife parks with expert guides. Book your adventure through Queen Elizabeth, Murchison Falls, Bwindi and more.{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<!-- Hero Section -->
+<section class="relative h-screen flex items-center justify-center bg-hero-pattern bg-cover bg-center bg-fixed">
+    <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40"></div>
+    <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
+        <h1 class="font-display text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+            Discover
+            <span class="bg-gradient-to-r from-safari-400 to-wildlife-400 bg-clip-text text-transparent">
+                Uganda's
+            </span>
+            Wildlife
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 text-gray-200 animate-slide-up">
+            Experience the magic of African wildlife through expertly guided tours in Uganda's most spectacular national parks
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
+            <a href="#tours" class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2">
+                <i data-lucide="binoculars" class="w-5 h-5"></i>
+                <span>Explore Tours</span>
+            </a>
+            <a href="#about" class="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 flex items-center justify-center space-x-2">
+                <i data-lucide="play" class="w-5 h-5"></i>
+                <span>Watch Video</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-gentle">
+        <i data-lucide="chevron-down" class="w-8 h-8 text-white"></i>
+    </div>
+</section>
+
+<!-- Search & Filter Section -->
+<section id="tours" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-display text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Choose Your <span class="text-safari-600">Adventure</span>
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                From gorilla trekking to safari expeditions, find the perfect wildlife experience that matches your spirit of adventure
+            </p>
+        </div>
+        
+        <!-- Enhanced Search Form -->
+        <div class="bg-gradient-to-r from-safari-50 to-wildlife-50 rounded-2xl p-8 mb-12 shadow-lg">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" 
+                  hx-get="{% url 'tours:tour_list' %}" 
+                  hx-target="#tour-results" 
+                  hx-trigger="input delay:500ms, change">
+                
+                <!-- Search Query -->
+                <div class="space-y-2 md:col-span-3 lg:col-span-2">
+                    <label for="id_search_query" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                        <span>Search Tours</span>
+                    </label>
+                    <input type="text" name="search_query" id="id_search_query" value="{{ form.search_query.value|default:'' }}" 
+                           placeholder="Search tours, parks, or descriptions..."
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                </div>
+                
+                <!-- Date From -->
+                <div class="space-y-2">
+                    <label for="id_date_from" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>From Date</span>
+                    </label>
+                    <input type="date" name="date_from" id="id_date_from" value="{{ form.date_from.value|default:'' }}" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                </div>
+                
+                <!-- Date To -->
+                <div class="space-y-2">
+                    <label for="id_date_to" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>To Date</span>
+                    </label>
+                    <input type="date" name="date_to" id="id_date_to" value="{{ form.date_to.value|default:'' }}" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                </div>
+                
+                <!-- Park Selection -->
+                <div class="space-y-2">
+                    <label for="id_park" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        <span>Park/Location</span>
+                    </label>
+                    <select name="park" id="id_park" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                        <option value="">All Parks</option>
+                        {% for choice in form.park.field.queryset %}
+                            <option value="{{ choice.id }}" {% if form.park.value == choice.id|stringformat:"s" or form.park.value == choice.id %}selected{% endif %}>
+                                {{ choice.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Guide Selection -->
+                <div class="space-y-2">
+                    <label for="id_guide" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                        <span>Preferred Guide</span>
+                    </label>
+                    <select name="guide" id="id_guide" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                        <option value="">Any Guide</option>
+                        {% for choice in form.guide.field.queryset %}
+                            <option value="{{ choice.id }}" {% if form.guide.value == choice.id|stringformat:"s" or form.guide.value == choice.id %}selected{% endif %}>
+                                {% if choice.user.first_name %}
+                                    {{ choice.user.first_name }} {{ choice.user.last_name|default:"" }}
+                                    {% if choice.specialization %} - {{ choice.specialization }}{% endif %}
+                                {% else %}
+                                    {{ choice.user.username }}
+                                    {% if choice.specialization %} - {{ choice.specialization }}{% endif %}
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Price Range -->
+                <div class="space-y-2">
+                    <label for="id_price_range" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                        <span>Price Range</span>
+                    </label>
+                    <select name="price_range" id="id_price_range" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                        <option value="">Any Price</option>
+                        <option value="0-100" {% if form.price_range.value == "0-100" %}selected{% endif %}>Under $100</option>
+                        <option value="100-200" {% if form.price_range.value == "100-200" %}selected{% endif %}>$100 - $200</option>
+                        <option value="200-500" {% if form.price_range.value == "200-500" %}selected{% endif %}>$200 - $500</option>
+                        <option value="500+" {% if form.price_range.value == "500+" %}selected{% endif %}>$500+</option>
+                    </select>
+                </div>
+                
+                <!-- Duration Filter -->
+                <div class="space-y-2">
+                    <label for="id_duration" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <span>Duration</span>
+                    </label>
+                    <select name="duration" id="id_duration" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                        <option value="">Any Duration</option>
+                        <option value="0-4" {% if form.duration.value == "0-4" %}selected{% endif %}>Half Day (Under 4h)</option>
+                        <option value="4-8" {% if form.duration.value == "4-8" %}selected{% endif %}>Full Day (4-8h)</option>
+                        <option value="8+" {% if form.duration.value == "8+" %}selected{% endif %}>Multi-Day (8h+)</option>
+                    </select>
+                </div>
+                
+                <!-- Min Slots -->
+                <div class="space-y-2">
+                    <label for="id_min_slots" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Min. Slots</span>
+                    </label>
+                    <input type="number" name="min_slots" id="id_min_slots" value="{{ form.min_slots.value|default:'' }}" 
+                           min="1" placeholder="Any" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="md:col-span-3 lg:col-span-4 flex justify-center space-x-4">
+                    <button type="submit" class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        <span>Search Adventures</span>
+                    </button>
+                    <button type="button" id="clearFilters" class="border-2 border-gray-300 text-gray-600 px-6 py-3 rounded-lg font-semibold hover:border-safari-600 hover:text-safari-600 transition-all duration-200 flex items-center space-x-2">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        <span>Clear Filters</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Tours Grid -->
+<section class="pb-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="tour-results">
+            <!-- Active Filter Indicator -->
+            {% if form.date_from.value or form.date_to.value or form.park.value or form.guide.value or form.price_range.value or form.duration.value or form.search_query.value or form.min_slots.value %}
+                <div class="mb-6 bg-gradient-to-r from-safari-50 to-wildlife-50 border border-safari-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-safari-600 rounded-full flex items-center justify-center">
+                                <i data-lucide="filter" class="w-4 h-4 text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Active Filters</h4>
+                                <div class="text-sm text-gray-600 flex flex-wrap gap-2 mt-1">
+                                    {% if form.search_query.value %}
+                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">Search: "{{ form.search_query.value }}"</span>
+                                    {% endif %}
+                                    {% if form.date_from.value %}
+                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">From: {{ form.date_from.value|date:"M d, Y" }}</span>
+                                    {% endif %}
+                                    {% if form.date_to.value %}
+                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">To: {{ form.date_to.value|date:"M d, Y" }}</span>
+                                    {% endif %}
+                                    {% if form.park.value %}
+                                        {% for park in form.park.field.queryset %}
+                                            {% if park.id == form.park.value|add:0 %}
+                                                <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">Park: {{ park.name }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if form.guide.value %}
+                                        {% for guide in form.guide.field.queryset %}
+                                            {% if guide.id == form.guide.value|add:0 %}
+                                                <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">
+                                                    Guide: {% if guide.user.first_name %}{{ guide.user.first_name }}{% else %}{{ guide.user.username }}{% endif %}
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if form.price_range.value %}
+                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">
+                                            Price: {% if form.price_range.value == "0-100" %}Under $100{% elif form.price_range.value == "100-200" %}$100-$200{% elif form.price_range.value == "200-500" %}$200-$500{% elif form.price_range.value == "500+" %}$500+{% endif %}
+                                        </span>
+                                    {% endif %}
+                                    {% if form.duration.value %}
+                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">
+                                            Duration: {% if form.duration.value == "0-4" %}Half Day{% elif form.duration.value == "4-8" %}Full Day{% elif form.duration.value == "8+" %}Multi-Day{% endif %}
+                                        </span>
+                                    {% endif %}
+                                    {% if form.min_slots.value %}
+                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">Min Slots: {{ form.min_slots.value }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('clearFilters').click()" 
+                                class="text-safari-600 hover:text-safari-800 font-medium text-sm flex items-center space-x-1">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <span>Clear All</span>
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if grouped_tours %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for tour_data in grouped_tours %}
+                        <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover group">
+                            <!-- Tour Image -->
+                            <div class="relative h-64 bg-gradient-to-br from-safari-400 to-wildlife-500 overflow-hidden">
+                                {% if tour_data.tour.image %}
+                                    <img src="{{ tour_data.tour.image.url }}" 
+                                         alt="{{ tour_data.tour.name }}" 
+                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <i data-lucide="camera" class="w-16 h-16 text-white/50"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Availability Summary Badge -->
+                                <div class="absolute top-4 left-4">
+                                    {% if tour_data.rating >= 4.5 and tour_data.completed_tours > 10 %}
+                                        <span class="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 mb-2">
+                                            <i data-lucide="crown" class="w-3 h-3"></i>
+                                            <span>Popular Choice</span>
+                                        </span>
+                                    {% endif %}
+                                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                                        <span>{{ tour_data.total_dates }} date{{ tour_data.total_dates|pluralize }} available</span>
+                                    </span>
+                                </div>
+                                
+                                <!-- Price badge -->
+                                <div class="absolute top-4 right-4">
+                                    <span class="bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-bold">
+                                        ${{ tour_data.tour.price }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Stats Badge -->
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <div class="bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium">Available:</span>
+                                            <span>{{ tour_data.total_slots }} total slot{{ tour_data.total_slots|pluralize }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs opacity-90">
+                                            <span>{{ tour_data.earliest_date|date:"M d" }} - {{ tour_data.latest_date|date:"M d, Y" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Quick action overlay -->
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <a href="{% url 'tours:tour_detail' tour_data.tour.id %}" 
+                                       class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors transform scale-95 group-hover:scale-100 duration-200">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Tour Content -->
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="bg-safari-100 text-safari-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        {{ tour_data.tour.park.name }}
+                                    </span>
+                                    <div class="flex items-center space-x-1 text-yellow-400">
+                                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                        <span class="text-gray-600 text-sm font-semibold">{{ tour_data.rating }}</span>
+                                    </div>
+                                </div>
+                                
+                                <h3 class="font-display text-xl font-bold text-gray-900 mb-2 group-hover:text-safari-600 transition-colors">
+                                    {{ tour_data.tour.name }}
+                                </h3>
+                                
+                                <p class="text-gray-600 mb-4 line-clamp-3">
+                                    {% if tour_data.tour.description %}
+                                        {{ tour_data.tour.description|truncatewords:20 }}
+                                    {% else %}
+                                        Experience the magic of Uganda's wildlife in this expertly guided tour through pristine natural habitats.
+                                    {% endif %}
+                                </p>
+                                
+                                <!-- Tour Details -->
+                                <div class="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="calendar-days" class="w-4 h-4 text-safari-600"></i>
+                                        <span>{{ tour_data.total_dates }} available date{{ tour_data.total_dates|pluralize }}</span>
+                                    </div>
+                            
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="user-check" class="w-4 h-4 text-safari-600"></i>
+                                        <span>
+                                            {% if tour_data.guides %}
+                                                {{ tour_data.guides|length }} Tour guide{{ tour_data.guides|length|pluralize }}
+                                            {% else %}
+                                                Expert Guide
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Availability Summary -->
+                                <div class="bg-gradient-to-r from-safari-50 to-wildlife-50 rounded-lg p-3 mb-4">
+                                    <div class="flex items-center justify-between text-sm mb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <i data-lucide="calendar-range" class="w-4 h-4 text-safari-600"></i>
+                                            <span class="font-medium text-gray-900">Next Available:</span>
+                                        </div>
+                                        <span class="text-safari-700 font-semibold">{{ tour_data.earliest_date|date:"M d, Y" }}</span>
+                                    </div>
+                                    {% if tour_data.total_dates > 1 %}
+                                    <div class="text-xs text-gray-600 mb-2">
+                                        Multiple dates through {{ tour_data.latest_date|date:"M d, Y" }}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- Popularity Stats -->
+                                    <div class="flex items-center justify-between text-xs text-gray-600 border-t border-gray-200 pt-2">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="flex items-center space-x-1">
+                                                <i data-lucide="users" class="w-3 h-3"></i>
+                                                <span>{{ tour_data.current_bookings }} booked</span>
+                                            </span>
+                                            <span class="flex items-center space-x-1">
+                                                <i data-lucide="award" class="w-3 h-3"></i>
+                                                <span>{{ tour_data.completed_tours }} completed</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex space-x-3">
+                                    <a href="{% url 'tours:tour_detail' tour_data.tour.id %}" 
+                                       class="flex-1 bg-gradient-to-r from-safari-600 to-wildlife-600 text-white py-3 px-4 rounded-lg font-semibold text-center hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2">
+                                        <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                                        <span>View Dates & Book</span>
+                                    </a>
+                                    
+                                    <!-- Wishlist button - always visible -->
+                                    <button onclick="console.log('Button clicked! Tour ID: {{ tour_data.tour.id }}'); toggleWishlist({{ tour_data.tour.id }}, this)" 
+                                            class="wishlist-btn border-2 {% if user.is_authenticated and tour_data.is_in_wishlist %}wishlist-added bg-red-50 border-red-500 text-red-600{% else %}bg-white border-safari-600 text-safari-600{% endif %} py-3 px-4 rounded-lg font-semibold hover:bg-safari-600 hover:text-white transition-all duration-200 flex items-center justify-center"
+                                            data-tour-id="{{ tour_data.tour.id }}"
+                                            title="{% if user.is_authenticated and tour_data.is_in_wishlist %}Remove from wishlist{% else %}Add to wishlist{% endif %}">
+                                        <i data-lucide="heart" class="w-4 h-4 {% if user.is_authenticated and tour_data.is_in_wishlist %}fill-current{% endif %}"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="text-center py-16">
+                    <div class="max-w-md mx-auto">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-400"></i>
+                        </div>
+                        <h3 class="font-display text-2xl font-bold text-gray-900 mb-2">No Tours Found</h3>
+                        <p class="text-gray-600 mb-6">
+                            We couldn't find any tours matching your criteria. Try adjusting your search filters or explore all available tours.
+                        </p>
+                        <a href="{% url 'tours:tour_list' %}" 
+                           class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 inline-flex items-center space-x-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            <span>Show All Tours</span>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Why Choose <span class="text-safari-600">UWA Tours</span>
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-safari-500 to-wildlife-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
+                </div>
+                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Expert Guides</h3>
+                <p class="text-gray-600">
+                    Our certified wildlife experts bring years of experience and deep knowledge of Uganda's ecosystems.
+                </p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-safari-500 to-wildlife-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="heart" class="w-8 h-8 text-white"></i>
+                </div>
+                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Conservation Focus</h3>
+                <p class="text-gray-600">
+                    Every tour contributes to wildlife conservation and supports local communities protecting Uganda's natural heritage.
+                </p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-safari-500 to-wildlife-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="award" class="w-8 h-8 text-white"></i>
+                </div>
+                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Award Winning</h3>
+                <p class="text-gray-600">
+                    Recognized for excellence in sustainable tourism and unforgettable wildlife experiences.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Calendar functionality
+    class TourCalendar {
+        constructor() {
+            this.currentDate = new Date();
+            this.selectedDate = null;
+            this.today = new Date();
+            this.init();
+        }
+        
+        init() {
+            this.renderCalendar();
+            this.bindEvents();
+            this.initQuickDateButtons();
+        }
+        
+        bindEvents() {
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.renderCalendar();
+            });
+            
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.renderCalendar();
+            });
+        }
+        
+        initQuickDateButtons() {
+            document.getElementById('todayBtn').addEventListener('click', () => {
+                this.selectDate(new Date());
+            });
+            
+            document.getElementById('tomorrowBtn').addEventListener('click', () => {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                this.selectDate(tomorrow);
+            });
+            
+            document.getElementById('weekendBtn').addEventListener('click', () => {
+                const saturday = new Date();
+                const daysUntilSaturday = (6 - saturday.getDay()) % 7;
+                saturday.setDate(saturday.getDate() + daysUntilSaturday);
+                if (daysUntilSaturday === 0) saturday.setDate(saturday.getDate() + 7); // Next Saturday if today is Saturday
+                this.selectDate(saturday);
+            });
+        }
+        
+        renderCalendar() {
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            
+            // Update month display
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
+            const lastDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+            
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'p-2';
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                const currentDateForDay = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), day);
+                const isPastDate = currentDateForDay < this.today.setHours(0, 0, 0, 0);
+                const isToday = this.isSameDate(currentDateForDay, this.today);
+                const isSelected = this.selectedDate && this.isSameDate(currentDateForDay, this.selectedDate);
+                
+                dayElement.className = `p-2 text-center text-sm cursor-pointer rounded-lg transition-all duration-200 ${
+                    isPastDate 
+                        ? 'text-gray-300 cursor-not-allowed' 
+                        : isSelected
+                        ? 'bg-safari-600 text-white font-bold shadow-lg'
+                        : isToday
+                        ? 'bg-wildlife-100 text-wildlife-800 font-semibold border-2 border-wildlife-400'
+                        : 'text-gray-700 hover:bg-safari-100 hover:text-safari-700 font-medium'
+                }`;
+                
+                dayElement.textContent = day;
+                
+                if (!isPastDate) {
+                    dayElement.addEventListener('click', () => {
+                        this.selectDate(currentDateForDay);
+                    });
+                }
+                
+                calendarDays.appendChild(dayElement);
+            }
+        }
+        
+        selectDate(date) {
+            this.selectedDate = new Date(date);
+            
+            // Update calendar display
+            this.renderCalendar();
+            
+            // Show selected date
+            const selectedDisplay = document.getElementById('selectedDateDisplay');
+            const selectedText = document.getElementById('selectedDateText');
+            selectedDisplay.classList.remove('hidden');
+            selectedText.textContent = this.formatDate(date);
+            
+            // Filter tours based on selected date
+            this.filterToursByDate(date);
+        }
+        
+        filterToursByDate(selectedDate) {
+            // Create date range: selected date onwards (no end date limit)
+            const fromDate = new Date(selectedDate);
+            
+            // Update the search form with the date range
+            const dateFromInput = document.getElementById('id_date_from');
+            const dateToInput = document.getElementById('id_date_to');
+            
+            dateFromInput.value = this.formatDateForInput(fromDate);
+            dateToInput.value = ''; // Clear end date to show all future dates
+            
+            // Submit the form to filter results
+            const form = dateFromInput.closest('form');
+            form.submit();
+        }
+        
+        formatDate(date) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+        formatDateForInput(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        isSameDate(date1, date2) {
+            return date1.getFullYear() === date2.getFullYear() &&
+                   date1.getMonth() === date2.getMonth() &&
+                   date1.getDate() === date2.getDate();
+        }
+    }
+    
+    // Initialize calendar when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        new TourCalendar();
+        
+        // Clear filters functionality
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            // Clear all form inputs
+            document.getElementById('id_search_query').value = '';
+            document.getElementById('id_date_from').value = '';
+            document.getElementById('id_date_to').value = '';
+            document.getElementById('id_park').value = '';
+            document.getElementById('id_guide').value = '';
+            document.getElementById('id_price_range').value = '';
+            document.getElementById('id_duration').value = '';
+            document.getElementById('id_min_slots').value = '';
+            
+            // Hide selected date display
+            document.getElementById('selectedDateDisplay').classList.add('hidden');
+            
+            // Submit form to show all tours
+            document.querySelector('form').submit();
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Initialize date inputs with today as minimum
+        const today = new Date().toISOString().split('T')[0];
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        dateInputs.forEach(input => {
+            input.setAttribute('min', today);
+        });
+    });
+
+    // Wishlist functionality
+    function toggleWishlist(tourId, button) {
+        console.log('=== WISHLIST DEBUG START ===');
+        console.log('toggleWishlist called with:', tourId, button);
+        
+        // Check if user is authenticated
+        const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+        console.log('User authenticated:', isAuthenticated);
+        
+        if (!isAuthenticated) {
+            console.log('User not authenticated, redirecting to login');
+            const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+            const loginUrl = `{% url 'accounts:login' %}?next=${currentUrl}`;
+            console.log('Login URL:', loginUrl);
+            window.location.href = loginUrl;
+            return;
+        }
+        
+        const icon = button.querySelector('i[data-lucide="heart"]');
+        const isInWishlist = button.classList.contains('wishlist-added');
+        console.log('Is in wishlist currently:', isInWishlist);
+        console.log('Button classes:', button.className);
+        
+        const url = isInWishlist 
+            ? `{% url 'accounts:remove_from_wishlist' 0 %}`.replace('0', tourId)
+            : `{% url 'accounts:add_to_wishlist' 0 %}`.replace('0', tourId);
+        
+        console.log('Making request to URL:', url);
+        console.log('Action:', isInWishlist ? 'REMOVE' : 'ADD');
+        
+        // Add loading state
+        button.disabled = true;
+        if (icon) icon.style.transform = 'scale(0.8)';
+        
+        const csrfToken = getCSRFToken();
+        console.log('CSRF Token found:', csrfToken ? 'YES' : 'NO');
+        console.log('CSRF Token value:', csrfToken);
+        
+        if (!csrfToken) {
+            console.error('❌ No CSRF token found!');
+            showToast('Security token missing. Please refresh the page.', 'error');
+            button.disabled = false;
+            if (icon) icon.style.transform = 'scale(1)';
+            return;
+        }
+        
+        console.log('🚀 Starting fetch request...');
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(response => {
+            console.log('📥 Response received:');
+            console.log('Status:', response.status);
+            console.log('Status Text:', response.statusText);
+            console.log('Headers:', Object.fromEntries([...response.headers.entries()]));
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('📋 Response data:', data);
+            
+            if (data.success) {
+                console.log('✅ Success! Action:', data.action);
+                
+                if (data.action === 'added') {
+                    button.classList.add('wishlist-added', 'bg-red-50', 'border-red-500', 'text-red-600');
+                    button.classList.remove('bg-white', 'border-safari-600', 'text-safari-600');
+                    if (icon) icon.classList.add('fill-current');
+                    button.title = 'Remove from wishlist';
+                } else if (data.action === 'removed') {
+                    button.classList.remove('wishlist-added', 'bg-red-50', 'border-red-500', 'text-red-600');
+                    button.classList.add('bg-white', 'border-safari-600', 'text-safari-600');
+                    if (icon) icon.classList.remove('fill-current');
+                    button.title = 'Add to wishlist';
+                }
+                
+                showToast(data.message, 'success');
+            } else {
+                console.error('❌ Server returned error:', data);
+                showToast(data.message || 'Failed to update wishlist', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('💥 Fetch error:', error);
+            console.error('Error details:', error.message);
+            showToast('Failed to update wishlist. Check console for details.', 'error');
+        })
+        .finally(() => {
+            console.log('🏁 Request completed, restoring button state');
+            button.disabled = false;
+            if (icon) icon.style.transform = 'scale(1)';
+            console.log('=== WISHLIST DEBUG END ===');
+        });
+    }
+    
+    // Get CSRF token
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+               document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ||
+               '';
+    }
+    
+    // Simple toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500' : 
+            type === 'error' ? 'bg-red-500' : 
+            'bg-blue-500'
+        }`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => toast.style.transform = 'translateX(0)', 100);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

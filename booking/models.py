@@ -96,6 +96,17 @@ class Booking(models.Model):
     def __str__(self):
         return f"Booking {self.booking_id} - {self.tourist.username} ({self.get_booking_status_display()})"
 
+    @property
+    def reference_code(self):
+        """Generate a user-friendly booking reference code"""
+        # Take first 8 characters of UUID and make uppercase
+        return f"UWA-{str(self.booking_id)[:8].upper()}"
+    
+    @property
+    def short_id(self):
+        """Generate a short ID for display in cards/lists"""
+        return str(self.booking_id)[:8].upper()
+
     def save(self, *args, **kwargs):
         # Calculate total cost if not set
         if not self.total_cost and self.availability:

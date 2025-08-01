@@ -1,0 +1,593 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ tour.name }} - Wildlife Tour in {{ tour.park.name }}{% endblock %}
+{% block description %}{{ tour.description|truncatewords:30 }} Experience this amazing wildlife tour in {{ tour.park.name }} with expert guides.{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Tour Image -->
+<section class="relative h-[70vh] overflow-hidden">
+    <div class="absolute inset-0">
+        {% if tour.image %}
+            <img src="{{ tour.image.url }}" 
+                 alt="{{ tour.name }}" 
+                 class="w-full h-full object-cover">
+        {% else %}
+            <div class="w-full h-full bg-gradient-to-br from-safari-600 via-wildlife-600 to-safari-800"></div>
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20"></div>
+    </div>
+    
+    <div class="relative z-10 h-full flex items-end">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
+            <div class="max-w-4xl">
+                <!-- Breadcrumb -->
+                <nav class="mb-6">
+                    <ol class="flex items-center space-x-2 text-white/80">
+                        <li><a href="{% url 'tours:tour_list' %}" class="hover:text-white transition-colors">Tours</a></li>
+                        <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+                        <li><span class="text-white">{{ tour.name }}</span></li>
+                    </ol>
+                </nav>
+                
+                <!-- Tour Info -->
+                <div class="flex items-center space-x-3 mb-4">
+                    <span class="bg-safari-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                        {{ tour.park.name }}
+                    </span>
+                    <div class="flex items-center space-x-1 text-yellow-400">
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                        <span class="text-white ml-2">(4.8/5 from 127 reviews)</span>
+                    </div>
+                </div>
+                
+                <h1 class="font-display text-4xl md:text-6xl font-bold text-white mb-4">
+                    {{ tour.name }}
+                </h1>
+                
+                <p class="text-xl text-white/90 mb-6 max-w-3xl">
+                    {% if tour.description %}
+                        {{ tour.description|truncatewords:25 }}
+                    {% else %}
+                        Experience the magic of Uganda's wildlife in this expertly guided tour through pristine natural habitats and encounter amazing creatures in their natural environment.
+                    {% endif %}
+                </p>
+                
+                <!-- Quick Stats -->
+                <div class="flex flex-wrap gap-6 text-white">
+                    {% if tour.duration %}
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="clock" class="w-5 h-5 text-safari-400"></i>
+                            <span>{{ tour.duration }} hours</span>
+                        </div>
+                    {% endif %}
+                    {% if tour.max_participants %}
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="users" class="w-5 h-5 text-safari-400"></i>
+                            <span>Max {{ tour.max_participants }} people</span>
+                        </div>
+                    {% endif %}
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-safari-400"></i>
+                        <span>{{ tour.park.name }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="dollar-sign" class="w-5 h-5 text-safari-400"></i>
+                        <span class="text-2xl font-bold">${{ tour.price }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-gentle">
+        <i data-lucide="chevron-down" class="w-8 h-8 text-white"></i>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-12">
+            <!-- Description -->
+            <section class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <i data-lucide="info" class="w-8 h-8 text-safari-600"></i>
+                    <span>About This Experience</span>
+                </h2>
+                <div class="prose prose-lg max-w-none text-gray-700">
+                    {% if tour.description %}
+                        <p>{{ tour.description }}</p>
+                    {% else %}
+                        <p>Embark on an unforgettable journey through Uganda's pristine wilderness. This expertly crafted tour offers you the opportunity to witness the country's incredible biodiversity up close.</p>
+                        
+                        <p>Our experienced guides will lead you through diverse ecosystems, sharing their deep knowledge of local wildlife behavior, conservation efforts, and the cultural significance of these protected areas.</p>
+                        
+                        <p>Whether you're seeking the thrill of spotting the Big Five, the serenity of bird watching, or the awe-inspiring experience of primate encounters, this tour promises memories that will last a lifetime.</p>
+                    {% endif %}
+                </div>
+            </section>
+            
+            <!-- What's Included -->
+            <section class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <i data-lucide="check-circle" class="w-8 h-8 text-safari-600"></i>
+                    <span>What's Included</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Expert wildlife guide</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Park entrance fees</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Transportation</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Refreshments</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Binoculars provided</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Wildlife viewing permit</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Safety equipment</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>Certificate of participation</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Park Information -->
+            <section class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <i data-lucide="map" class="w-8 h-8 text-safari-600"></i>
+                    <span>{{ tour.park.name }}</span>
+                </h2>
+                <div class="space-y-4">
+                    {% if tour.park.description %}
+                        <p class="text-gray-700">{{ tour.park.description }}</p>
+                    {% else %}
+                        <p class="text-gray-700">
+                            {{ tour.park.name }} is one of Uganda's premier wildlife destinations, offering visitors the chance to experience incredible biodiversity and stunning natural landscapes. This protected area is home to numerous species and provides crucial habitat for wildlife conservation.
+                        </p>
+                    {% endif %}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 p-4 bg-safari-50 rounded-xl">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-safari-600">500+</div>
+                            <div class="text-sm text-gray-600">Bird Species</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-safari-600">95+</div>
+                            <div class="text-sm text-gray-600">Mammal Species</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-safari-600">{{ tour.park.name|length }}km²</div>
+                            <div class="text-sm text-gray-600">Protected Area</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Booking Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-24 space-y-6">
+                <!-- Booking Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <div class="text-center mb-6">
+                        <div class="text-3xl font-bold text-safari-600 mb-2">${{ tour.price }}</div>
+                        <div class="text-gray-600">per person</div>
+                    </div>
+                    
+                    <h3 class="font-display text-xl font-bold text-gray-900 mb-4 flex items-center justify-between">
+                        <span>Available Dates</span>
+                        {% if page_obj.paginator.num_pages > 1 %}
+                            <span class="text-sm font-normal text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                                {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ total_dates }} dates
+                            </span>
+                        {% elif total_dates > 0 %}
+                            <span class="text-sm font-normal text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                                {{ total_dates }}/{{ total_dates }} dates
+                            </span>
+                        {% endif %}
+                    </h3>
+                    
+                    <!-- Month Filter Dropdown -->
+                    {% if available_months %}
+                        <div class="mb-4 p-3 bg-gradient-to-r from-safari-50 to-wildlife-50 rounded-lg border border-safari-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <i data-lucide="calendar-days" class="w-4 h-4 text-safari-600"></i>
+                                    <span class="text-sm font-medium text-gray-700">Filter by Month:</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <select id="monthFilter" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-safari-500 focus:border-transparent bg-white">
+                                        <option value="">All Months</option>
+                                        {% for month_date in available_months %}
+                                            <option value="{{ month_date|date:'Y-m' }}" 
+                                                    {% if selected_month == month_date|date:'Y-m' %}selected{% endif %}>
+                                                {{ month_date|date:'F Y' }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if selected_month %}
+                                        <button id="clearMonthFilter" class="text-xs text-safari-600 hover:text-safari-800 font-medium px-2 py-1 rounded hover:bg-white transition-colors">
+                                            <i data-lucide="x" class="w-3 h-3 inline mr-1"></i>Clear
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if selected_month %}
+                                <div class="mt-2 text-xs text-gray-600">
+                                    <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
+                                    Showing dates for {{ selected_month|date:'F Y' }} only
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Booking Summary -->
+                    {% if upcoming_availabilities %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-green-600">{{ available_count }}</div>
+                                <div class="text-sm text-green-700">Available Date{{ available_count|pluralize }}</div>
+                            </div>
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-red-600">{{ fully_booked_count }}</div>
+                                <div class="text-sm text-red-700">Fully Booked Date{{ fully_booked_count|pluralize }}</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Popularity Indicator -->
+                    {% if fully_booked_count > 0 %}
+                        <div class="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center space-x-1">
+                                    <i data-lucide="fire" class="w-5 h-5 text-orange-500"></i>
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-red-500"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Popular Tour!</h4>
+                                    <p class="text-sm text-gray-600">
+                                        {{ fully_booked_count }} date{{ fully_booked_count|pluralize }} already fully booked. 
+                                        Book early to secure your preferred date.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if upcoming_availabilities %}
+                        <div class="space-y-3 mb-6" id="availability-list">
+                            {% for availability in upcoming_availabilities %}
+                                <div class="border border-gray-200 rounded-lg p-4 hover:border-safari-300 transition-colors
+                                    {% if availability.slots_available == 0 %}bg-gray-50 border-gray-300{% endif %}">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <div class="font-semibold text-gray-900">
+                                                {{ availability.date|date:"F d, Y" }}
+                                            </div>
+                                            <div class="text-sm text-gray-600">
+                                                {{ availability.date|date:"l" }}
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            {% if availability.slots_available > 0 %}
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="text-sm">
+                                                        <span class="text-green-600 font-semibold">{{ availability.slots_available }}</span>
+                                                        <span class="text-gray-500">spots left</span>
+                                                    </div>
+                                                    {% if availability.booking_percentage > 50 %}
+                                                        <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+                                                            {% if availability.booking_percentage > 80 %}Almost Full{% else %}Popular{% endif %}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                                                        Fully Booked
+                                                    </span>
+                                                    <i data-lucide="fire" class="w-4 h-4 text-red-500" title="Popular tour!"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Booking Progress Bar -->
+                                    <div class="mb-3">
+                                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                            <span>{{ availability.spots_booked }}/{{ availability.total_spots }} booked</span>
+                                            <span>{{ availability.booking_percentage|floatformat:0 }}% full</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="h-2 rounded-full transition-all duration-300
+                                                {% if availability.slots_available == 0 %}bg-red-500
+                                                {% elif availability.booking_percentage > 80 %}bg-orange-500
+                                                {% elif availability.booking_percentage > 50 %}bg-yellow-500
+                                                {% else %}bg-green-500{% endif %}"
+                                                style="width: {{ availability.booking_percentage }}%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if availability.guide %}
+                                        <div class="flex items-center space-x-2 text-sm text-gray-600 mb-3">
+                                            <i data-lucide="user-check" class="w-4 h-4"></i>
+                                            <span>Guide: 
+                                                {% if availability.guide.user.first_name %}
+                                                    {{ availability.guide.user.first_name }} {{ availability.guide.user.last_name }}
+                                                {% else %}
+                                                    {{ availability.guide.user.username }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if availability.can_book %}
+                                        <a href="{% url 'booking:create_booking' availability.id %}" 
+                                           class="w-full bg-gradient-to-r from-safari-600 to-wildlife-600 text-white py-2 px-4 rounded-lg font-semibold text-center hover:shadow-lg transform hover:scale-105 transition-all duration-200 block">
+                                            Book This Date
+                                        </a>
+                                    {% else %}
+                                        <div class="w-full bg-gray-100 border-2 border-dashed border-gray-300 py-2 px-4 rounded-lg text-center">
+                                            <div class="flex items-center justify-center space-x-2 text-gray-500">
+                                                <i data-lucide="calendar-x" class="w-4 h-4"></i>
+                                                <span class="font-medium">Fully Booked - This tour is very popular!</span>
+                                            </div>
+                                            <div class="text-xs text-gray-400 mt-1">
+                                                Try another date or contact us for waitlist
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Compact Pagination Controls -->
+                        {% if page_obj.paginator.num_pages > 1 %}
+                            <div class="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <!-- Compact Page Info -->
+                                    <div class="text-xs text-gray-600">
+                                        <span class="font-semibold text-safari-600">{{ page_obj.number }}</span>/<span class="font-semibold text-safari-600">{{ page_obj.paginator.num_pages }}</span> 
+                                        ({{ total_dates }} dates)
+                                    </div>
+                                    
+                                    <!-- Compact Pagination -->
+                                    <div class="flex items-center space-x-1">
+                                        {% if page_obj.has_previous %}
+                                            <a href="?page=1{% if selected_month %}&month={{ selected_month }}{% endif %}" class="p-1.5 text-gray-500 hover:text-safari-600 hover:bg-white rounded transition-colors" title="First">
+                                                <i data-lucide="chevrons-left" class="w-3 h-3"></i>
+                                            </a>
+                                            <a href="?page={{ page_obj.previous_page_number }}{% if selected_month %}&month={{ selected_month }}{% endif %}" class="p-1.5 text-gray-500 hover:text-safari-600 hover:bg-white rounded transition-colors" title="Previous">
+                                                <i data-lucide="chevron-left" class="w-3 h-3"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="p-1.5 text-gray-300 cursor-not-allowed">
+                                                <i data-lucide="chevrons-left" class="w-3 h-3"></i>
+                                            </span>
+                                            <span class="p-1.5 text-gray-300 cursor-not-allowed">
+                                                <i data-lucide="chevron-left" class="w-3 h-3"></i>
+                                            </span>
+                                        {% endif %}
+                                        
+                                        <!-- Current Page -->
+                                        <span class="px-2 py-1 text-xs font-semibold text-white bg-safari-600 rounded">{{ page_obj.number }}</span>
+                                        
+                                        {% if page_obj.has_next %}
+                                            <a href="?page={{ page_obj.next_page_number }}{% if selected_month %}&month={{ selected_month }}{% endif %}" class="p-1.5 text-gray-500 hover:text-safari-600 hover:bg-white rounded transition-colors" title="Next">
+                                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                            </a>
+                                            <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_month %}&month={{ selected_month }}{% endif %}" class="p-1.5 text-gray-500 hover:text-safari-600 hover:bg-white rounded transition-colors" title="Last">
+                                                <i data-lucide="chevrons-right" class="w-3 h-3"></i>
+                                            </a>
+                                        {% else %}
+                                            <span class="p-1.5 text-gray-300 cursor-not-allowed">
+                                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                            </span>
+                                            <span class="p-1.5 text-gray-300 cursor-not-allowed">
+                                                <i data-lucide="chevrons-right" class="w-3 h-3"></i>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i data-lucide="calendar-x" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
+                            <h4 class="font-semibold text-gray-900 mb-2">No Available Dates</h4>
+                            <p class="text-gray-600 text-sm mb-4">
+                                There are currently no scheduled dates for this tour. Check back soon or contact us for private bookings.
+                            </p>
+                            <a href="{% url 'tours:tour_list' %}" 
+                               class="inline-flex items-center space-x-2 text-safari-600 hover:text-safari-700 font-medium">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                <span>Browse Other Tours</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Contact Card -->
+                <div class="bg-gradient-to-br from-safari-600 to-wildlife-600 rounded-2xl p-6 text-white shadow-lg">
+                    <h3 class="font-display text-xl font-bold mb-4">Need Help?</h3>
+                    <p class="text-safari-100 mb-4">
+                        Our wildlife experts are here to help you plan the perfect adventure.
+                    </p>
+                    <div class="space-y-3">
+                        <a href="tel:+256123456789" 
+                           class="flex items-center space-x-3 text-white hover:text-safari-200 transition-colors">
+                            <i data-lucide="phone" class="w-5 h-5"></i>
+                            <span>+256 123 456 789</span>
+                        </a>
+                        <a href="mailto:info@uwatours.com" 
+                           class="flex items-center space-x-3 text-white hover:text-safari-200 transition-colors">
+                            <i data-lucide="mail" class="w-5 h-5"></i>
+                            <span>info@uwatours.com</span>
+                        </a>
+                        <a href="#" 
+                           class="flex items-center space-x-3 text-white hover:text-safari-200 transition-colors">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                            <span>Live Chat</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Share Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <h3 class="font-display text-xl font-bold text-gray-900 mb-4">Share This Tour</h3>
+                    <div class="flex space-x-3">
+                        <button class="flex-1 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                            <i data-lucide="facebook" class="w-5 h-5"></i>
+                        </button>
+                        <button class="flex-1 bg-sky-500 text-white p-3 rounded-lg hover:bg-sky-600 transition-colors flex items-center justify-center">
+                            <i data-lucide="twitter" class="w-5 h-5"></i>
+                        </button>
+                        <button class="flex-1 bg-pink-600 text-white p-3 rounded-lg hover:bg-pink-700 transition-colors flex items-center justify-center">
+                            <i data-lucide="instagram" class="w-5 h-5"></i>
+                        </button>
+                        <button class="flex-1 bg-gray-600 text-white p-3 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center">
+                            <i data-lucide="share-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Similar Tours Section -->
+<section class="bg-gray-50 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                More Adventures in <span class="text-safari-600">{{ tour.park.name }}</span>
+            </h2>
+            <p class="text-xl text-gray-600">
+                Discover other amazing wildlife experiences in this incredible location
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Similar tours would be loaded here via HTMX -->
+            <div hx-get="{% url 'tours:similar_tours' tour.id %}" 
+                 hx-trigger="revealed"
+                 class="col-span-full">
+                <div class="flex justify-center items-center py-12">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-safari-600"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Month Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const monthFilter = document.getElementById('monthFilter');
+        const clearMonthFilter = document.getElementById('clearMonthFilter');
+        
+        if (monthFilter) {
+            monthFilter.addEventListener('change', function() {
+                const selectedMonth = this.value;
+                const currentUrl = new URL(window.location.href);
+                
+                if (selectedMonth) {
+                    currentUrl.searchParams.set('month', selectedMonth);
+                } else {
+                    currentUrl.searchParams.delete('month');
+                }
+                
+                // Reset to first page when changing month filter
+                currentUrl.searchParams.delete('page');
+                
+                window.location.href = currentUrl.toString();
+            });
+        }
+        
+        if (clearMonthFilter) {
+            clearMonthFilter.addEventListener('click', function() {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.delete('month');
+                currentUrl.searchParams.delete('page');
+                window.location.href = currentUrl.toString();
+            });
+        }
+    });
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Share functionality
+    document.querySelectorAll('[class*="bg-blue-600"], [class*="bg-sky-500"], [class*="bg-pink-600"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const url = window.location.href;
+            const title = document.title;
+            
+            if (this.querySelector('[data-lucide="facebook"]')) {
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+            } else if (this.querySelector('[data-lucide="twitter"]')) {
+                window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+            } else if (this.querySelector('[data-lucide="instagram"]')) {
+                // Instagram doesn't support direct sharing, so copy to clipboard
+                navigator.clipboard.writeText(url);
+                alert('Link copied to clipboard!');
+            }
+        });
+    });
+    
+    // Copy to clipboard for general share
+    document.querySelector('[data-lucide="share-2"]')?.parentElement.addEventListener('click', function() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i>';
+            lucide.createIcons();
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                lucide.createIcons();
+            }, 2000);
+        });
+    });
+</script>
+{% endblock %}

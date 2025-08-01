@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% block title %}Help & Support - {{ user.get_full_name|default:user.username }} | UWA Wildlife Tours{% endblock %}
+{% block description %}Get help with your bookings, account, and wildlife tour questions.{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="bg-gradient-to-br from-safari-600 via-wildlife-600 to-safari-700 text-white py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center space-x-4 mb-6">
+            <a href="{% url 'accounts:profile' %}" class="flex items-center space-x-2 text-white/80 hover:text-white transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span>Back to Profile</span>
+            </a>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <i data-lucide="help-circle" class="w-8 h-8 text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-display text-3xl md:text-4xl font-bold mb-2">Help & Support</h1>
+                <p class="text-white/90 text-lg">We're here to help you have the best wildlife experience</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Support Content -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Quick Help -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-6">Quick Help</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <a href="#booking-help" class="flex items-center space-x-4 p-4 bg-safari-50 rounded-lg hover:bg-safari-100 transition-colors">
+                    <div class="w-12 h-12 bg-safari-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="calendar" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Booking Help</h3>
+                        <p class="text-sm text-gray-600">Issues with your bookings</p>
+                    </div>
+                </a>
+                
+                <a href="#account-help" class="flex items-center space-x-4 p-4 bg-wildlife-50 rounded-lg hover:bg-wildlife-100 transition-colors">
+                    <div class="w-12 h-12 bg-wildlife-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Account Issues</h3>
+                        <p class="text-sm text-gray-600">Profile and account settings</p>
+                    </div>
+                </a>
+                
+                <a href="#payment-help" class="flex items-center space-x-4 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                    <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="credit-card" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Payment Support</h3>
+                        <p class="text-sm text-gray-600">Payment and refund questions</p>
+                    </div>
+                </a>
+                
+                <a href="#tour-info" class="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                    <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="map" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Tour Information</h3>
+                        <p class="text-sm text-gray-600">Details about tours and parks</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Contact Options -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-6">Contact Us</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center p-6 bg-gray-50 rounded-lg">
+                    <div class="w-16 h-16 bg-safari-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="phone" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Call Us</h3>
+                    <p class="text-sm text-gray-600 mb-4">Speak with our support team</p>
+                    <p class="font-semibold text-safari-600">+256 123 456 789</p>
+                    <p class="text-xs text-gray-500 mt-1">24/7 Emergency Support</p>
+                </div>
+                
+                <div class="text-center p-6 bg-gray-50 rounded-lg">
+                    <div class="w-16 h-16 bg-wildlife-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="mail" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Email Support</h3>
+                    <p class="text-sm text-gray-600 mb-4">Send us a detailed message</p>
+                    <p class="font-semibold text-wildlife-600">support@uwatours.com</p>
+                    <p class="text-xs text-gray-500 mt-1">Response within 2 hours</p>
+                </div>
+                
+                <div class="text-center p-6 bg-gray-50 rounded-lg">
+                    <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="message-circle" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Live Chat</h3>
+                    <p class="text-sm text-gray-600 mb-4">Chat with us in real-time</p>
+                    <button class="font-semibold text-green-600 hover:text-green-700" onclick="alert('Live chat feature coming soon!')">Start Chat</button>
+                    <p class="text-xs text-gray-500 mt-1">Available 8AM - 6PM EAT</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="bg-white rounded-2xl shadow-lg p-8" id="faq">
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+            
+            <div class="space-y-4">
+                <!-- Booking Help -->
+                <div id="booking-help" class="border-b border-gray-200 pb-4">
+                    <h3 class="font-semibold text-lg text-safari-600 mb-3">Booking & Reservations</h3>
+                    
+                    <div class="space-y-3">
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-safari-600">
+                                <span class="font-medium">How do I cancel or modify my booking?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                You can cancel or modify your booking up to 48 hours before the tour date. Go to "My Bookings" in your profile, select the booking, and choose your action. Cancellations made more than 48 hours in advance receive a full refund.
+                            </div>
+                        </details>
+                        
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-safari-600">
+                                <span class="font-medium">What happens if my tour is cancelled due to weather?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                If a tour is cancelled due to weather conditions, you'll receive a full refund or can reschedule to another available date at no extra cost. We'll notify you as soon as possible via email and SMS.
+                            </div>
+                        </details>
+                        
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-safari-600">
+                                <span class="font-medium">Can I book for someone else?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                Yes, you can book tours for friends and family. Just provide their details during the booking process. The primary contact information should be yours for communication purposes.
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                
+                <!-- Account Help -->
+                <div id="account-help" class="border-b border-gray-200 pb-4">
+                    <h3 class="font-semibold text-lg text-wildlife-600 mb-3">Account & Profile</h3>
+                    
+                    <div class="space-y-3">
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-wildlife-600">
+                                <span class="font-medium">How do I update my profile information?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                Click on "Edit Profile" from your profile page to update your personal information, contact details, and preferences. Changes are saved automatically when you submit the form.
+                            </div>
+                        </details>
+                        
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-wildlife-600">
+                                <span class="font-medium">I forgot my password. How do I reset it?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                Click "Forgot Password" on the login page and enter your email address. We'll send you a secure link to reset your password. The link expires after 1 hour for security.
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                
+                <!-- Payment Help -->
+                <div id="payment-help" class="border-b border-gray-200 pb-4">
+                    <h3 class="font-semibold text-lg text-green-600 mb-3">Payment & Refunds</h3>
+                    
+                    <div class="space-y-3">
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-green-600">
+                                <span class="font-medium">What payment methods do you accept?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                We accept Visa, Mastercard, American Express, and PayPal. All payments are processed securely through encrypted connections. Payment is required at the time of booking.
+                            </div>
+                        </details>
+                        
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-green-600">
+                                <span class="font-medium">How long do refunds take to process?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                Refunds are processed within 3-5 business days after approval. The time for the money to appear in your account depends on your bank or payment provider, typically 5-10 business days.
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                
+                <!-- Tour Information -->
+                <div id="tour-info">
+                    <h3 class="font-semibold text-lg text-blue-600 mb-3">Tours & Parks</h3>
+                    
+                    <div class="space-y-3">
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-blue-600">
+                                <span class="font-medium">What should I bring on a wildlife tour?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                Essential items include comfortable walking shoes, hat, sunscreen, insect repellent, camera, and water bottle. Specific packing lists are provided after booking. Our guides carry first aid kits and emergency communication devices.
+                            </div>
+                        </details>
+                        
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-blue-600">
+                                <span class="font-medium">Are tours suitable for children?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                Most tours welcome children over 6 years old, accompanied by adults. Some tours have age restrictions for safety reasons. Child-friendly tours are clearly marked, and we offer family discounts for groups with children.
+                            </div>
+                        </details>
+                        
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer py-2 hover:text-blue-600">
+                                <span class="font-medium">What if I don't see any animals during the tour?</span>
+                                <i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-2 text-gray-600 text-sm">
+                                While we can't guarantee specific animal sightings as wildlife is unpredictable, our experienced guides know the best spots and times for animal activity. The tour experience includes beautiful landscapes, bird watching, and nature education regardless of large animal sightings.
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emergency Information -->
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-8 mt-8">
+            <h2 class="font-display text-2xl font-bold text-red-800 mb-4 flex items-center space-x-2">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                <span>Emergency Information</span>
+            </h2>
+            <div class="text-red-700">
+                <p class="mb-4">If you have an emergency during a tour or need immediate assistance:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="font-semibold">Emergency Hotline:</p>
+                        <p class="text-lg font-bold">+256 999 000 111</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Tour Guide Direct Line:</p>
+                        <p class="text-lg font-bold">+256 888 999 000</p>
+                    </div>
+                </div>
+                <p class="text-red-600 text-sm mt-4">
+                    Available 24/7. For medical emergencies, call local emergency services first: 911 or 112
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Smooth scrolling to FAQ sections
+    document.addEventListener('DOMContentLoaded', function() {
+        const links = document.querySelectorAll('a[href^="#"]');
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Auto-expand FAQ section if linked directly
+        const hash = window.location.hash;
+        if (hash) {
+            const section = document.querySelector(hash);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                // Open first FAQ in that section
+                const firstDetails = section.querySelector('details');
+                if (firstDetails) {
+                    firstDetails.open = true;
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

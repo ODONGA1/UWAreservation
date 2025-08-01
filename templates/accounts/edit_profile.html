@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - {{ user.get_full_name|default:user.username }} | UWA Wildlife Tours{% endblock %}
+{% block description %}Update your profile information, contact details, and account preferences for UWA Wildlife Tours.{% endblock %}
+
+{% block content %}
+<!-- Profile Edit Header -->
+<section class="bg-gradient-to-br from-safari-600 via-wildlife-600 to-safari-700 text-white py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white/30">
+                <i data-lucide="user-edit" class="w-10 h-10 text-white"></i>
+            </div>
+            <h1 class="font-display text-3xl md:text-4xl font-bold mb-2">Edit Your Profile</h1>
+            <p class="text-white/90 text-lg">Update your information to enhance your wildlife adventure experience</p>
+        </div>
+    </div>
+</section>
+
+<!-- Edit Profile Form -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Navigation Breadcrumb -->
+        <nav class="mb-8">
+            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                <a href="{% url 'accounts:profile' %}" class="hover:text-safari-600 transition-colors">Profile</a>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                <span class="text-safari-600 font-medium">Edit Profile</span>
+            </div>
+        </nav>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="mb-8">
+                {% for message in messages %}
+                    <div class="bg-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-50 border border-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-200 text-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-800 px-4 py-3 rounded-lg mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert-circle{% else %}info{% endif %}" class="w-5 h-5"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar Navigation -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
+                    <h3 class="font-semibold text-gray-900 mb-4">Profile Settings</h3>
+                    <nav class="space-y-2">
+                        <a href="#basic-info" class="flex items-center space-x-3 text-safari-600 bg-safari-50 px-3 py-2 rounded-lg font-medium">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                            <span>Basic Information</span>
+                        </a>
+                        <a href="#profile-details" class="flex items-center space-x-3 text-gray-600 hover:text-safari-600 hover:bg-safari-50 px-3 py-2 rounded-lg transition-colors">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span>Profile Details</span>
+                        </a>
+                        <a href="{% url 'accounts:change_password' %}" class="flex items-center space-x-3 text-gray-600 hover:text-safari-600 hover:bg-safari-50 px-3 py-2 rounded-lg transition-colors">
+                            <i data-lucide="lock" class="w-4 h-4"></i>
+                            <span>Change Password</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <form method="post" class="space-y-8">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information Section -->
+                    <div id="basic-info" class="bg-white rounded-2xl shadow-lg p-8">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-10 h-10 bg-gradient-to-br from-safari-500 to-safari-600 rounded-full flex items-center justify-center">
+                                <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">Basic Information</h2>
+                                <p class="text-gray-600 text-sm">Update your personal details and contact information</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- First Name -->
+                            <div class="space-y-2">
+                                <label for="{{ user_form.first_name.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                    <i data-lucide="user" class="w-4 h-4"></i>
+                                    <span>First Name</span>
+                                </label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
+                                    {% for error in user_form.first_name.errors %}
+                                        <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Last Name -->
+                            <div class="space-y-2">
+                                <label for="{{ user_form.last_name.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                    <i data-lucide="user" class="w-4 h-4"></i>
+                                    <span>Last Name</span>
+                                </label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                    {% for error in user_form.last_name.errors %}
+                                        <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="space-y-2 md:col-span-2">
+                                <label for="{{ user_form.email.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                    <i data-lucide="mail" class="w-4 h-4"></i>
+                                    <span>Email Address</span>
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                {{ user_form.email }}
+                                {% if user_form.email.errors %}
+                                    {% for error in user_form.email.errors %}
+                                        <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Username Display (Read-only) -->
+                            <div class="space-y-2 md:col-span-2">
+                                <label class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                    <i data-lucide="at-sign" class="w-4 h-4"></i>
+                                    <span>Username</span>
+                                </label>
+                                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+                                    {{ user.username }}
+                                </div>
+                                <p class="text-xs text-gray-500">Your username cannot be changed</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Details Section -->
+                    <div id="profile-details" class="bg-white rounded-2xl shadow-lg p-8">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-10 h-10 bg-gradient-to-br from-wildlife-500 to-wildlife-600 rounded-full flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">Profile Details</h2>
+                                <p class="text-gray-600 text-sm">Additional information to personalize your experience</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Role -->
+                            <div class="space-y-2">
+                                <label for="{{ profile_form.role.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                                    <span>Account Type</span>
+                                </label>
+                                {{ profile_form.role }}
+                                {% if profile_form.role.errors %}
+                                    {% for error in profile_form.role.errors %}
+                                        <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="text-xs text-gray-500">Choose your primary role on our platform</p>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div class="space-y-2">
+                                <label for="{{ profile_form.phone_number.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                    <i data-lucide="phone" class="w-4 h-4"></i>
+                                    <span>Phone Number</span>
+                                </label>
+                                {{ profile_form.phone_number }}
+                                {% if profile_form.phone_number.errors %}
+                                    {% for error in profile_form.phone_number.errors %}
+                                        <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="text-xs text-gray-500">We'll use this for booking confirmations and important updates</p>
+                            </div>
+
+                            <!-- Bio -->
+                            <div class="space-y-2">
+                                <label for="{{ profile_form.bio.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    <span>Bio</span>
+                                </label>
+                                {{ profile_form.bio }}
+                                {% if profile_form.bio.errors %}
+                                    {% for error in profile_form.bio.errors %}
+                                        <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="text-xs text-gray-500">Share your passion for wildlife and what makes you an adventure seeker</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="bg-white rounded-2xl shadow-lg p-8">
+                        <div class="flex flex-col sm:flex-row gap-4 justify-end">
+                            <a href="{% url 'accounts:profile' %}" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 text-center">
+                                Cancel
+                            </a>
+                            <button type="submit" class="px-8 py-3 bg-gradient-to-r from-safari-600 to-wildlife-600 text-white rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                <span>Save Changes</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Account Management Tips -->
+<section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-4">Profile Tips</h2>
+            <p class="text-gray-600">Make the most of your UWA Wildlife Tours experience</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-6 bg-safari-50 rounded-2xl">
+                <div class="w-12 h-12 bg-safari-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Complete Your Profile</h3>
+                <p class="text-gray-600 text-sm">Add all your details to get personalized tour recommendations and faster bookings.</p>
+            </div>
+            
+            <div class="text-center p-6 bg-wildlife-50 rounded-2xl">
+                <div class="w-12 h-12 bg-wildlife-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="bell" class="w-6 h-6 text-white"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Stay Updated</h3>
+                <p class="text-gray-600 text-sm">Keep your contact information current to receive important booking updates and offers.</p>
+            </div>
+            
+            <div class="text-center p-6 bg-green-50 rounded-2xl">
+                <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="lock" class="w-6 h-6 text-white"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Secure Account</h3>
+                <p class="text-gray-600 text-sm">Regularly update your password and review your account settings for security.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Form validation feedback
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value) {
+                this.classList.add('border-red-300');
+                this.classList.remove('border-gray-300');
+            } else {
+                this.classList.remove('border-red-300');
+                this.classList.add('border-gray-300');
+            }
+        });
+    });
+</script>
+{% endblock %}

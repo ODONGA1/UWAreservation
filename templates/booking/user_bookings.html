@@ -102,7 +102,7 @@
 
         <!-- Quick Status Indicators -->
         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 12px; color: #6c757d;">
-          Booking #{{ booking.booking_id|truncatechars:13 }}
+          Booking ID: {{ booking.reference_code }}
           {% if booking.availability.date < today %}
           - <span style="color: #6c757d">Past Tour</span>
           {% elif booking.availability.date == today %}

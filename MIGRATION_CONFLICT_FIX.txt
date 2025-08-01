@@ -1,0 +1,45 @@
+"""
+MIGRATION CONFLICT RESOLUTION GUIDE
+
+The error occurs because there are conflicting migration files. Here's how to fix it:
+
+STEPS TO RESOLVE:
+
+1. First, let's clean up the migration files:
+   - Delete the file: accounts/migrations/0002_notificationsettings_wishlist.py
+   - Keep only: 0003_notificationsettings_wishlist.py
+
+2. Clear Django's migration tracking:
+   Run: python manage.py migrate accounts --fake 0002_enhanced_profile
+   This marks the 0002_enhanced_profile migration as applied without actually running it
+
+3. Then apply the new migration:
+   Run: python manage.py migrate accounts
+
+ALTERNATIVE APPROACH (if above doesn't work):
+
+1. Reset all migrations:
+   - Delete all files in accounts/migrations/ EXCEPT __init__.py and 0001_initial.py
+   
+2. Create fresh migrations:
+   Run: python manage.py makemigrations accounts
+   
+3. Apply migrations:
+   Run: python manage.py migrate accounts
+
+COMMANDS TO RUN:
+
+# Option 1 (Recommended):
+python manage.py migrate accounts --fake 0002_enhanced_profile
+python manage.py migrate accounts
+
+# Option 2 (If Option 1 fails):
+# First manually delete migration files, then:
+python manage.py makemigrations accounts
+python manage.py migrate accounts
+
+WHAT THIS WILL FIX:
+✅ Resolve migration conflicts
+✅ Ensure proper database schema
+✅ Allow future migrations to work correctly
+"""

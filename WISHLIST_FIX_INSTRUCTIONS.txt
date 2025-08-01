@@ -1,0 +1,67 @@
+"""
+SOLUTION FOR WISHLIST TABLE ERROR
+
+The error "no such table: accounts_wishlist" occurs because the database migration hasn't been applied yet.
+
+STEPS TO FIX:
+
+1. Open a command prompt or PowerShell
+2. Navigate to the project directory:
+   cd "d:\VU\Advanced Application development and Database Design\Coursework2\UWAreservation"
+
+3. Run the migration:
+   python manage.py migrate
+
+ALTERNATIVE APPROACH (if migration fails):
+
+If the migration command doesn't work, you can create the tables directly using the Django shell:
+
+1. Run: python manage.py shell
+2. Copy and paste this code:
+
+from django.db import connection
+
+# Create the accounts_wishlist table
+with connection.cursor() as cursor:
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS accounts_wishlist (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            tour_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            UNIQUE(user_id, tour_id),
+            FOREIGN KEY (tour_id) REFERENCES tours_tour(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES auth_user(id) ON DELETE CASCADE
+        );
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS accounts_notificationsettings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email_bookings BOOLEAN NOT NULL DEFAULT 1,
+            email_promotions BOOLEAN NOT NULL DEFAULT 1,
+            email_reminders BOOLEAN NOT NULL DEFAULT 1,
+            email_updates BOOLEAN NOT NULL DEFAULT 1,
+            sms_reminders BOOLEAN NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            user_id INTEGER NOT NULL UNIQUE,
+            FOREIGN KEY (user_id) REFERENCES auth_user(id) ON DELETE CASCADE
+        );
+    ''')
+    
+    # Create indexes for better performance
+    cursor.execute('CREATE INDEX IF NOT EXISTS accounts_wishlist_tour_id_idx ON accounts_wishlist (tour_id);')
+    cursor.execute('CREATE INDEX IF NOT EXISTS accounts_wishlist_user_id_idx ON accounts_wishlist (user_id);')
+    cursor.execute('CREATE INDEX IF NOT EXISTS accounts_wishlist_added_at_idx ON accounts_wishlist (added_at);')
+
+print("Tables created successfully!")
+
+3. Press Ctrl+D (or type exit()) to exit the shell
+
+AFTER FIXING:
+Once the tables are created, the wishlist functionality should work properly:
+- Users can add/remove tours from their wishlist
+- Heart icons on tour cards will work
+- The wishlist page at /accounts/wishlist/ will display correctly
+"""

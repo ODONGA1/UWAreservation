@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Methods - {{ user.get_full_name|default:user.username }} | UWA Wildlife Tours{% endblock %}
+{% block description %}Manage your payment methods and billing information.{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="bg-gradient-to-br from-safari-600 via-wildlife-600 to-safari-700 text-white py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center space-x-4 mb-6">
+            <a href="{% url 'accounts:profile' %}" class="flex items-center space-x-2 text-white/80 hover:text-white transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span>Back to Profile</span>
+            </a>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <i data-lucide="credit-card" class="w-8 h-8 text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-display text-3xl md:text-4xl font-bold mb-2">Payment Methods</h1>
+                <p class="text-white/90 text-lg">Manage your payment methods and billing information</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Payment Methods Content -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Current Payment Methods -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
+                <i data-lucide="credit-card" class="w-6 h-6 text-safari-600"></i>
+                <span>Saved Payment Methods</span>
+            </h2>
+            
+            <!-- Placeholder for saved cards -->
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="credit-card" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No Payment Methods Added</h3>
+                <p class="text-gray-600 mb-6">Add a payment method to make booking tours faster and easier.</p>
+                <button class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 inline-flex items-center space-x-2" onclick="showAddPaymentModal()">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Add Payment Method</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Payment Security -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
+                <i data-lucide="shield-check" class="w-6 h-6 text-safari-600"></i>
+                <span>Payment Security</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-lg">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="lock" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">SSL Encrypted</h3>
+                        <p class="text-sm text-gray-600 mt-1">All payment information is encrypted and securely transmitted.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="shield" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">PCI Compliant</h3>
+                        <p class="text-sm text-gray-600 mt-1">We follow industry-standard security protocols for payment processing.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-4 p-4 bg-purple-50 rounded-lg">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="eye-off" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">No Storage</h3>
+                        <p class="text-sm text-gray-600 mt-1">We don't store your full card details on our servers.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start space-x-4 p-4 bg-orange-50 rounded-lg">
+                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="dollar-sign" class="w-6 h-6 text-orange-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Secure Payments</h3>
+                        <p class="text-sm text-gray-600 mt-1">Powered by trusted payment processors with fraud protection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Accepted Payment Methods -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="font-display text-2xl font-bold text-gray-900 mb-6">Accepted Payment Methods</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg">
+                    <img src="https://via.placeholder.com/60x40/1f2937/ffffff?text=VISA" alt="Visa" class="h-8">
+                </div>
+                <div class="flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg">
+                    <img src="https://via.placeholder.com/60x40/1f2937/ffffff?text=MC" alt="Mastercard" class="h-8">
+                </div>
+                <div class="flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg">
+                    <img src="https://via.placeholder.com/60x40/1f2937/ffffff?text=AMEX" alt="American Express" class="h-8">
+                </div>
+                <div class="flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg">
+                    <img src="https://via.placeholder.com/60x40/1f2937/ffffff?text=PP" alt="PayPal" class="h-8">
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-gradient-to-r from-safari-50 to-wildlife-50 border border-safari-200 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="info" class="w-5 h-5 text-safari-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-safari-800">Payment Processing</h3>
+                        <div class="mt-2 text-sm text-safari-700">
+                            <p>
+                                Payment methods will be processed at checkout. We support major credit cards and PayPal for your convenience.
+                                All transactions are secure and processed through encrypted connections.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add Payment Method Modal -->
+<div id="addPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" onclick="hideAddPaymentModal()">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-display text-xl font-bold text-gray-900">Add Payment Method</h3>
+                <button onclick="hideAddPaymentModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-safari-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="credit-card" class="w-8 h-8 text-safari-600"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Coming Soon</h4>
+                <p class="text-gray-600 mb-6">Secure payment method management will be available soon. For now, you can add payment details during checkout.</p>
+                <button onclick="hideAddPaymentModal()" class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition-all duration-200">
+                    Got it
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function showAddPaymentModal() {
+        document.getElementById('addPaymentModal').classList.remove('hidden');
+    }
+    
+    function hideAddPaymentModal() {
+        document.getElementById('addPaymentModal').classList.add('hidden');
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            hideAddPaymentModal();
+        }
+    });
+</script>
+{% endblock %}

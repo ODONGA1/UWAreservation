@@ -1,0 +1,57 @@
+{% for tour in similar_tours %}
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover">
+        <div class="relative h-48 bg-gradient-to-br from-safari-400 to-wildlife-500">
+            {% if tour.image %}
+                <img src="{{ tour.image.url }}" 
+                     alt="{{ tour.name }}" 
+                     class="w-full h-full object-cover">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center">
+                    <i data-lucide="camera" class="w-12 h-12 text-white/50"></i>
+                </div>
+            {% endif %}
+            
+            <div class="absolute top-4 right-4">
+                <span class="bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-bold">
+                    ${{ tour.price }}
+                </span>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-3">
+                <span class="bg-safari-100 text-safari-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {{ tour.park.name }}
+                </span>
+                <div class="flex items-center space-x-1 text-yellow-400">
+                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                    <span class="text-gray-600 text-sm">4.8</span>
+                </div>
+            </div>
+            
+            <h3 class="font-display text-xl font-bold text-gray-900 mb-2">
+                {{ tour.name }}
+            </h3>
+            
+            <p class="text-gray-600 mb-4 line-clamp-3">
+                {% if tour.description %}
+                    {{ tour.description|truncatewords:15 }}
+                {% else %}
+                    Discover the wonders of {{ tour.park.name }} in this expertly guided wildlife experience.
+                {% endif %}
+            </p>
+            
+            <div class="flex space-x-3">
+                <a href="{% url 'tours:tour_detail' tour.id %}" 
+                   class="flex-1 bg-gradient-to-r from-safari-600 to-wildlife-600 text-white py-2 px-4 rounded-lg font-semibold text-center hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                    View Details
+                </a>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <div class="col-span-full text-center py-8">
+        <i data-lucide="search" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
+        <p class="text-gray-600">No similar tours found at the moment.</p>
+    </div>
+{% endfor %}

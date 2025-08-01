@@ -1,0 +1,436 @@
+{% extends 'base.html' %}
+
+{% block title %}Book {{ availability.tour.name }} - {{ availability.date|date:"F d, Y" }}{% endblock %}
+{% block description %}Complete your booking for {{ availability.tour.name }} on {{ availability.date|date:"F d, Y" }} in {{ availability.tour.park.name }}.{% endblock %}
+
+{% block content %}
+<!-- Progress Indicator -->
+<div class="bg-white border-b border-gray-200 sticky top-16 z-40">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+            <h1 class="font-display text-2xl font-bold text-gray-900">Complete Your Booking</h1>
+            <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 text-safari-600">
+                    <div class="w-6 h-6 bg-safari-600 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
+                    <span class="text-sm font-medium">Booking Details</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                <div class="flex items-center space-x-2 text-gray-400">
+                    <div class="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                    <span class="text-sm">Payment</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                <div class="flex items-center space-x-2 text-gray-400">
+                    <div class="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center text-xs font-bold">3</div>
+                    <span class="text-sm">Confirmation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="min-h-screen bg-gradient-to-br from-safari-50 to-wildlife-50 py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Booking Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <!-- Tour Header -->
+                    <div class="relative h-48 bg-gradient-to-r from-safari-600 to-wildlife-600">
+                        {% if availability.tour.image %}
+                            <img src="{{ availability.tour.image.url }}" 
+                                 alt="{{ availability.tour.name }}" 
+                                 class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40"></div>
+                        {% endif %}
+                        <div class="absolute inset-0 flex items-center justify-center text-white text-center p-6">
+                            <div>
+                                <h2 class="font-display text-3xl font-bold mb-2">{{ availability.tour.name }}</h2>
+                                <p class="text-safari-200 flex items-center justify-center space-x-4">
+                                    <span class="flex items-center space-x-1">
+                                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                                        <span>{{ availability.tour.park.name }}</span>
+                                    </span>
+                                    <span class="flex items-center space-x-1">
+                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                        <span>{{ availability.date|date:"F d, Y" }}</span>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Content -->
+                    <div class="p-8">
+                        {% if form.errors or form.non_field_errors %}
+                            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <div class="flex items-center space-x-2 text-red-800">
+                                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                                    <h4 class="font-semibold">Please correct the following errors:</h4>
+                                </div>
+                                <ul class="mt-2 list-disc list-inside text-sm text-red-700">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ field }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        
+                        <form method="post" id="booking-form">
+                            {% csrf_token %}
+                            
+                            <div id="form-container" class="space-y-8">
+                                <!-- Guest Information -->
+                                <div class="space-y-6">
+                                    <h3 class="font-display text-xl font-bold text-gray-900 flex items-center space-x-2">
+                                        <i data-lucide="users" class="w-6 h-6 text-safari-600"></i>
+                                        <span>Guest Information</span>
+                                    </h3>
+                                    
+                                    <!-- Number of People -->
+                                    <div class="space-y-2">
+                                        <label for="{{ form.num_of_people.id_for_label }}" 
+                                               class="block text-sm font-medium text-gray-700">
+                                            Number of People
+                                        </label>
+                                        <div class="relative">
+                                            <input type="number" name="num_of_people" id="id_num_of_people" 
+                                                   value="{{ form.num_of_people.value|default:'' }}" 
+                                                   min="1" max="{{ availability.slots_available }}"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent text-lg font-semibold">
+                                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <i data-lucide="users" class="w-5 h-5 text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        {% if form.num_of_people.errors %}
+                                            <div class="text-red-600 text-sm flex items-center space-x-1">
+                                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                                <span>{{ form.num_of_people.errors.0 }}</span>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Real-time availability check -->
+                                        <div id="availability-check" class="text-sm">
+                                            {% if availability.slots_available > 0 %}
+                                                <div class="flex items-center space-x-2 text-green-600">
+                                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                                    <span>{{ availability.slots_available }} spots available</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="flex items-center space-x-2 text-red-600">
+                                                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                                    <span>No spots available</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Contact Email -->
+                                    <div class="space-y-2">
+                                        <label for="{{ form.contact_email.id_for_label }}" 
+                                               class="block text-sm font-medium text-gray-700">
+                                            Contact Email <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input type="email" name="contact_email" id="id_contact_email" 
+                                                   value="{{ form.contact_email.value|default:user.email }}" 
+                                                   required
+                                                   class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                                            <div class="absolute left-4 top-1/2 transform -translate-y-1/2">
+                                                <i data-lucide="mail" class="w-5 h-5 text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        {% if form.contact_email.errors %}
+                                            <div class="text-red-600 text-sm flex items-center space-x-1">
+                                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                                <span>{{ form.contact_email.errors.0 }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Contact Phone -->
+                                    <div class="space-y-2">
+                                        <label for="{{ form.contact_phone.id_for_label }}" 
+                                               class="block text-sm font-medium text-gray-700">
+                                            Contact Phone (Optional)
+                                        </label>
+                                        <div class="relative">
+                                            <input type="tel" name="contact_phone" id="id_contact_phone" 
+                                                   value="{{ form.contact_phone.value|default:'' }}" 
+                                                   placeholder="+256 123 456 789"
+                                                   class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                                            <div class="absolute left-4 top-1/2 transform -translate-y-1/2">
+                                                <i data-lucide="phone" class="w-5 h-5 text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        {% if form.contact_phone.errors %}
+                                            <div class="text-red-600 text-sm flex items-center space-x-1">
+                                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                                <span>{{ form.contact_phone.errors.0 }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Special Requirements -->
+                                    <div class="space-y-2">
+                                        <label for="{{ form.special_requirements.id_for_label }}" 
+                                               class="block text-sm font-medium text-gray-700">
+                                            Special Requirements (Optional)
+                                        </label>
+                                        <textarea name="special_requirements" id="id_special_requirements" 
+                                                  rows="4" 
+                                                  placeholder="Any dietary restrictions, mobility needs, or special requests..."
+                                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent resize-none">{{ form.special_requirements.value|default:'' }}</textarea>
+                                        {% if form.special_requirements.errors %}
+                                            <div class="text-red-600 text-sm flex items-center space-x-1">
+                                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                                <span>{{ form.special_requirements.errors.0 }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Terms and Conditions -->
+                                <div class="bg-gray-50 rounded-lg p-6">
+                                    <h4 class="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                                        <i data-lucide="file-text" class="w-5 h-5 text-safari-600"></i>
+                                        <span>Important Information</span>
+                                    </h4>
+                                    <ul class="space-y-2 text-sm text-gray-700">
+                                        <li class="flex items-start space-x-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                            <span>Cancellation allowed up to 24 hours before the tour</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                            <span>Weather-dependent activity - alternative arrangements may be made</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                            <span>Minimum age requirement may apply for certain activities</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <i data-lucide="check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0"></i>
+                                            <span>Photography and videography allowed for personal use</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                                    <a href="{% url 'tours:tour_detail' availability.tour.id %}" 
+                                       class="flex-1 border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold text-center hover:bg-gray-50 transition-all duration-200 flex items-center justify-center space-x-2">
+                                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                                        <span>Back to Tour</span>
+                                    </a>
+                                    <button type="submit" 
+                                            class="flex-1 bg-gradient-to-r from-safari-600 to-wildlife-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                        <i data-lucide="calendar-plus" class="w-5 h-5"></i>
+                                        <span>Confirm Booking</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Booking Summary -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-32 space-y-6">
+                    <!-- Summary Card -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="font-display text-xl font-bold text-gray-900 mb-6 flex items-center space-x-2">
+                            <i data-lucide="file-text" class="w-6 h-6 text-safari-600"></i>
+                            <span>Booking Summary</span>
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <span class="text-gray-600">Tour</span>
+                                <span class="font-semibold text-gray-900 text-right">{{ availability.tour.name }}</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Date</span>
+                                <span class="font-semibold text-gray-900">{{ availability.date|date:"F d, Y" }}</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Day</span>
+                                <span class="font-semibold text-gray-900">{{ availability.date|date:"l" }}</span>
+                            </div>
+                            
+                            {% if availability.guide %}
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Guide</span>
+                                    <span class="font-semibold text-gray-900">
+                                        {% if availability.guide.user.first_name %}
+                                            {{ availability.guide.user.first_name }} {{ availability.guide.user.last_name }}
+                                        {% else %}
+                                            {{ availability.guide.user.username }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="border-t border-gray-200 pt-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Price per person</span>
+                                    <span class="font-semibold text-gray-900">${{ availability.tour.price }}</span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center" id="people-count">
+                                    <span class="text-gray-600">Number of people</span>
+                                    <span class="font-semibold text-gray-900">1</span>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-gray-200 pt-4">
+                                <div class="flex justify-between items-center text-lg">
+                                    <span class="font-bold text-gray-900">Total</span>
+                                    <span class="font-bold text-safari-600" id="total-price">${{ availability.tour.price }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Guide Information -->
+                    {% if availability.guide %}
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="font-display text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
+                                <i data-lucide="user-check" class="w-6 h-6 text-safari-600"></i>
+                                <span>Your Guide</span>
+                            </h3>
+                            
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-safari-500 to-wildlife-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                    {% if availability.guide.user.first_name %}
+                                        {{ availability.guide.user.first_name.0 }}{{ availability.guide.user.last_name.0 }}
+                                    {% else %}
+                                        {{ availability.guide.user.username.0|upper }}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">
+                                        {% if availability.guide.user.first_name %}
+                                            {{ availability.guide.user.first_name }} {{ availability.guide.user.last_name }}
+                                        {% else %}
+                                            {{ availability.guide.user.username }}
+                                        {% endif %}
+                                    </h4>
+                                    <p class="text-sm text-gray-600">Wildlife Expert</p>
+                                </div>
+                            </div>
+                            
+                            {% if availability.guide.experience_years %}
+                                <div class="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+                                    <i data-lucide="award" class="w-4 h-4 text-safari-600"></i>
+                                    <span>{{ availability.guide.experience_years }} years of experience</span>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-500"></i>
+                                <span>4.9/5 rating (127 reviews)</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Need Help Card -->
+                    <div class="bg-gradient-to-br from-safari-600 to-wildlife-600 rounded-2xl p-6 text-white">
+                        <h3 class="font-display text-lg font-bold mb-3">Need Assistance?</h3>
+                        <p class="text-safari-100 text-sm mb-4">
+                            Our team is here to help with your booking or answer any questions.
+                        </p>
+                        <div class="space-y-2">
+                            <a href="tel:+256123456789" 
+                               class="flex items-center space-x-2 text-white hover:text-safari-200 transition-colors text-sm">
+                                <i data-lucide="phone" class="w-4 h-4"></i>
+                                <span>+256 123 456 789</span>
+                            </a>
+                            <a href="mailto:bookings@uwatours.com" 
+                               class="flex items-center space-x-2 text-white hover:text-safari-200 transition-colors text-sm">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                                <span>bookings@uwatours.com</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Dynamic price calculation
+    function updatePriceCalculation() {
+        const peopleInput = document.querySelector('input[name="num_of_people"]');
+        const pricePerPerson = {{ availability.tour.price }};
+        const peopleCountDisplay = document.getElementById('people-count').querySelector('span:last-child');
+        const totalPriceDisplay = document.getElementById('total-price');
+        
+        if (peopleInput) {
+            const numPeople = parseInt(peopleInput.value) || 1;
+            const totalPrice = pricePerPerson * numPeople;
+            
+            peopleCountDisplay.textContent = numPeople;
+            totalPriceDisplay.textContent = `$${totalPrice}`;
+        }
+    }
+    
+    // Update price when people count changes
+    document.addEventListener('input', function(e) {
+        if (e.target.name === 'num_of_people') {
+            updatePriceCalculation();
+        }
+    });
+    
+    // Form validation
+    document.getElementById('booking-form').addEventListener('submit', function(e) {
+        const peopleInput = document.querySelector('input[name="num_of_people"]');
+        const emailInput = document.querySelector('input[name="contact_email"]');
+        const availableSlots = {{ availability.slots_available }};
+        let hasErrors = false;
+        
+        // Validate number of people
+        if (peopleInput && parseInt(peopleInput.value) > availableSlots) {
+            e.preventDefault();
+            alert(`Sorry, only ${availableSlots} spots are available for this tour.`);
+            return false;
+        }
+        
+        // Validate required fields
+        if (!peopleInput || !peopleInput.value || parseInt(peopleInput.value) < 1) {
+            hasErrors = true;
+            alert('Please enter the number of people for this booking.');
+        }
+        
+        if (!emailInput || !emailInput.value.trim()) {
+            hasErrors = true;
+            alert('Please enter a contact email address.');
+        }
+        
+        if (hasErrors) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Processing...</span>';
+        lucide.createIcons();
+    });
+    
+    // Initialize price calculation
+    updatePriceCalculation();
+</script>
+{% endblock %}

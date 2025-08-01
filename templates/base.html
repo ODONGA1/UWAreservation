@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}UWA Wildlife Tours - Discover Uganda's Natural Beauty{% endblock %}</title>
+    <meta name="description" content="{% block description %}Explore Uganda's magnificent wildlife with expert-guided tours through national parks and conservation areas.{% endblock %}">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'safari': {
+                            50: '#f0f9f0',
+                            100: '#dcf2dc',
+                            200: '#bce5bc',
+                            300: '#8fd18f',
+                            400: '#5cb85c',
+                            500: '#3e8e3e',
+                            600: '#2e6e2e',
+                            700: '#235623',
+                            800: '#1e451e',
+                            900: '#1a3a1a'
+                        },
+                        'wildlife': {
+                            50: '#fdf7ed',
+                            100: '#f9ebd4',
+                            200: '#f2d4a8',
+                            300: '#e9b571',
+                            400: '#de8f38',
+                            500: '#d67315',
+                            600: '#c85d0f',
+                            700: '#a64610',
+                            800: '#873713',
+                            900: '#6f2e13'
+                        }
+                    },
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'body': ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        .bg-hero-pattern {
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="wildlife" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.06)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23wildlife)"/></svg>');
+        }
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Notification Badge Animation */
+        .notification-badge {
+            animation: pulse-red 2s infinite;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        
+        @keyframes pulse-red {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+        
+        /* Bell shake animation */
+        .bell-shake {
+            animation: bellShake 1s ease-in-out infinite;
+        }
+        
+        @keyframes bellShake {
+            0%, 50%, 100% {
+                transform: rotate(0deg);
+            }
+            10%, 30% {
+                transform: rotate(-10deg);
+            }
+            20%, 40% {
+                transform: rotate(10deg);
+            }
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="font-body bg-gradient-to-br from-safari-50 to-wildlife-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-morphism">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-safari-600 to-wildlife-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="trees" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display text-xl font-bold text-gray-800">UWA Wildlife</h1>
+                        <p class="text-xs text-gray-600">Tours & Adventures</p>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="{% url 'tours:tour_list' %}" class="flex items-center space-x-2 text-gray-700 hover:text-safari-600 transition-colors duration-200">
+                        <i data-lucide="binoculars" class="w-4 h-4"></i>
+                        <span>Tours</span>
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'booking:user_bookings' %}" class="flex items-center space-x-2 text-gray-700 hover:text-safari-600 transition-colors duration-200">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                            <span>My Bookings</span>
+                        </a>
+                        <!-- Notification Bell -->
+                        <div class="relative" id="notification-dropdown">
+                            <button id="notification-button" class="relative flex items-center space-x-2 text-gray-700 hover:text-safari-600 transition-colors duration-200">
+                                <div class="relative">
+                                    <i data-lucide="bell" class="w-4 h-4 {% if unread_notifications > 0 %}bell-shake{% endif %}"></i>
+                                    {% if unread_notifications > 0 %}
+                                        <span class="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-white notification-badge">
+                                            <span class="text-white text-xs font-bold leading-none">{{ unread_notifications }}</span>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </button>
+                            
+                            <!-- Notification Dropdown -->
+                            <div id="notification-panel" class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible transform scale-95 transition-all duration-200 z-50">
+                                <div class="p-4 border-b border-gray-100">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                        <a href="{% url 'accounts:notification_settings' %}" class="text-sm text-safari-600 hover:text-safari-700">Settings</a>
+                                    </div>
+                                </div>
+                                
+                                <div id="notifications-list" class="max-h-96 overflow-y-auto">
+                                    <!-- Loading state -->
+                                    <div id="notifications-loading" class="p-8 text-center">
+                                        <div class="animate-spin w-6 h-6 border-2 border-safari-600 border-t-transparent rounded-full mx-auto mb-2"></div>
+                                        <p class="text-sm text-gray-500">Loading notifications...</p>
+                                    </div>
+                                    
+                                    <!-- Empty state -->
+                                    <div id="notifications-empty" class="p-8 text-center hidden">
+                                        <i data-lucide="bell-off" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+                                        <h4 class="font-medium text-gray-900 mb-1">No notifications</h4>
+                                        <p class="text-sm text-gray-500">You're all caught up!</p>
+                                    </div>
+                                    
+                                    <!-- Notifications will be loaded here -->
+                                </div>
+                                
+                                <div class="p-3 border-t border-gray-100 bg-gray-50 rounded-b-lg">
+                                    <a href="{% url 'accounts:notifications' %}" class="block text-center text-sm text-safari-600 hover:text-safari-700 font-medium">
+                                        View all notifications
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 text-gray-700 hover:text-safari-600 transition-colors duration-200">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                                <span>{{ user.username }}</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-safari-50">Profile</a>
+                                <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-safari-50">Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" class="text-gray-700 hover:text-safari-600 transition-colors duration-200">Sign In</a>
+                        <a href="{% url 'accounts:signup' %}?next={{ request.get_full_path|urlencode }}" class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all duration-200">
+                            Join Adventure
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-safari-600">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white/90 backdrop-blur-md border-t border-gray-200">
+            <div class="px-4 pt-2 pb-3 space-y-1">
+                <a href="{% url 'tours:tour_list' %}" class="block px-3 py-2 text-gray-700 hover:text-safari-600">Tours</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'booking:user_bookings' %}" class="block px-3 py-2 text-gray-700 hover:text-safari-600">My Bookings</a>
+                    <a href="{% url 'accounts:notifications' %}" class="relative block px-3 py-2 text-gray-700 hover:text-safari-600">
+                        <div class="flex items-center space-x-2">
+                            <div class="relative">
+                                <i data-lucide="bell" class="w-4 h-4 {% if unread_notifications > 0 %}bell-shake{% endif %}"></i>
+                                {% if unread_notifications > 0 %}
+                                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center notification-badge">
+                                        <span class="text-white text-xs font-bold leading-none">{{ unread_notifications }}</span>
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <span>Notifications</span>
+                            {% if unread_notifications > 0 %}
+                                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ unread_notifications }}</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <a href="{% url 'accounts:profile' %}" class="block px-3 py-2 text-gray-700 hover:text-safari-600">Profile</a>
+                    <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-left px-3 py-2 text-gray-700 hover:text-safari-600">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" class="block px-3 py-2 text-gray-700 hover:text-safari-600">Sign In</a>
+                    <a href="{% url 'accounts:signup' %}?next={{ request.get_full_path|urlencode }}" class="block px-3 py-2 text-gray-700 hover:text-safari-600">Join Adventure</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Messages -->
+    {% if messages %}
+        <div id="messages" class="fixed top-20 right-4 z-40 space-y-2">
+            {% for message in messages %}
+                <div class="message-toast bg-white rounded-lg shadow-lg p-4 max-w-sm animate-slide-up border-l-4 
+                    {% if message.tags == 'success' %}border-green-500 text-green-800{% elif message.tags == 'error' %}border-red-500 text-red-800{% elif message.tags == 'warning' %}border-yellow-500 text-yellow-800{% else %}border-blue-500 text-blue-800{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            {% if message.tags == 'success' %}
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                            {% elif message.tags == 'error' %}
+                                <i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-500"></i>
+                            {% else %}
+                                <i data-lucide="info" class="w-5 h-5 text-blue-500"></i>
+                            {% endif %}
+                            <span class="text-sm font-medium">{{ message }}</span>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="pt-16">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-safari-600 to-wildlife-600 rounded-full flex items-center justify-center">
+                            <i data-lucide="trees" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-xl font-bold">UWA Wildlife Tours</h3>
+                            <p class="text-gray-400 text-sm">Discover Uganda's Natural Beauty</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">
+                        Experience the magic of Uganda's wildlife through expertly guided tours. 
+                        From the majestic mountain gorillas to the Big Five, discover nature's wonders with us.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-safari-400 transition-colors">
+                            <i data-lucide="facebook" class="w-5 h-5"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-safari-400 transition-colors">
+                            <i data-lucide="twitter" class="w-5 h-5"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-safari-400 transition-colors">
+                            <i data-lucide="instagram" class="w-5 h-5"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="{% url 'tours:tour_list' %}" class="hover:text-safari-400 transition-colors">All Tours</a></li>
+                        <li><a href="#" class="hover:text-safari-400 transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-safari-400 transition-colors">Conservation</a></li>
+                        <li><a href="#" class="hover:text-safari-400 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact Info</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-center space-x-2">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                            <span>+256 123 456 789</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                            <span>info@uwatours.com</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            <span>Kampala, Uganda</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 UWA Wildlife Tours. All rights reserved. | Protecting Uganda's Natural Heritage</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+        
+        // Auto-hide messages after 5 seconds
+        setTimeout(() => {
+            const messages = document.getElementById('messages');
+            if (messages) {
+                messages.style.transition = 'opacity 0.5s ease-out';
+                messages.style.opacity = '0';
+                setTimeout(() => messages.remove(), 500);
+            }
+        }, 5000);
+        
+        // HTMX loading indicator
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            const target = evt.target;
+            target.style.opacity = '0.6';
+            target.style.cursor = 'wait';
+        });
+        
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            const target = evt.target;
+            target.style.opacity = '1';
+            target.style.cursor = 'default';
+            lucide.createIcons(); // Re-initialize icons after HTMX updates
+        });
+        
+        // Notification dropdown functionality
+        const notificationButton = document.getElementById('notification-button');
+        const notificationPanel = document.getElementById('notification-panel');
+        const notificationsList = document.getElementById('notifications-list');
+        const loadingState = document.getElementById('notifications-loading');
+        const emptyState = document.getElementById('notifications-empty');
+        
+        if (notificationButton && notificationPanel) {
+            let isOpen = false;
+            let notificationsLoaded = false;
+            
+            // Toggle dropdown
+            notificationButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (!isOpen) {
+                    openDropdown();
+                } else {
+                    closeDropdown();
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!notificationPanel.contains(e.target) && !notificationButton.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+            
+            function openDropdown() {
+                isOpen = true;
+                notificationPanel.classList.remove('opacity-0', 'invisible', 'scale-95');
+                notificationPanel.classList.add('opacity-100', 'visible', 'scale-100');
+                
+                // Load notifications if not already loaded
+                if (!notificationsLoaded) {
+                    loadNotifications();
+                }
+            }
+            
+            function closeDropdown() {
+                isOpen = false;
+                notificationPanel.classList.remove('opacity-100', 'visible', 'scale-100');
+                notificationPanel.classList.add('opacity-0', 'invisible', 'scale-95');
+            }
+            
+            function loadNotifications() {
+                fetch('{% url "accounts:get_notifications" %}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        loadingState.classList.add('hidden');
+                        
+                        if (data.success === false) {
+                            // Handle API error
+                            loadingState.classList.remove('hidden');
+                            loadingState.innerHTML = `
+                                <div class="p-8 text-center">
+                                    <p class="text-sm text-red-500">Error: ${data.error || 'Failed to load notifications'}</p>
+                                    <button onclick="location.reload()" class="mt-2 text-xs text-safari-600 hover:text-safari-700">Try again</button>
+                                </div>
+                            `;
+                        } else if (data.notifications && data.notifications.length > 0) {
+                            displayNotifications(data.notifications);
+                        } else {
+                            emptyState.classList.remove('hidden');
+                        }
+                        
+                        notificationsLoaded = true;
+                    })
+                    .catch(error => {
+                        console.error('Error loading notifications:', error);
+                        loadingState.classList.remove('hidden');
+                        loadingState.innerHTML = `
+                            <div class="p-8 text-center">
+                                <p class="text-sm text-red-500">Failed to load notifications</p>
+                                <p class="text-xs text-gray-400 mt-1">${error.message}</p>
+                                <button onclick="location.reload()" class="mt-2 text-xs text-safari-600 hover:text-safari-700">Try again</button>
+                            </div>
+                        `;
+                    });
+            }
+            
+            function displayNotifications(notifications) {
+                const notificationsHtml = notifications.map(notification => `
+                    <a href="${notification.url}" class="block px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 ${notification.bg_color} rounded-full flex items-center justify-center">
+                                    <i data-lucide="${notification.icon}" class="w-4 h-4 ${notification.color}"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">${notification.title}</p>
+                                <p class="text-sm text-gray-600 mt-1">${notification.message}</p>
+                                <p class="text-xs text-gray-400 mt-1">${notification.time}</p>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+                
+                notificationsList.innerHTML = notificationsHtml;
+                lucide.createIcons(); // Re-initialize icons for new content
+            }
+        }
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

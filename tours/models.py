@@ -34,5 +34,10 @@ class Tour(models.Model):
     max_participants = models.PositiveIntegerField(default=10)
     image = models.ImageField(upload_to='tours/', blank=True, null=True, help_text="Image of the tour")
 
+    @property
+    def duration(self):
+        """Alias for duration_hours for backward compatibility"""
+        return self.duration_hours
+
     def __str__(self):
         return f"{self.name} in {self.park.name}"

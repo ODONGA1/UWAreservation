@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import Booking, Availability
 from accounts.models import Profile
+from tours.models import Park, Guide
 
 
 class BookingForm(forms.ModelForm):
@@ -73,12 +74,12 @@ class BookingForm(forms.ModelForm):
 
 
 class AvailabilitySearchForm(forms.Form):
-    """Form for searching available tours"""
+    """Enhanced form for searching available tours"""
     
     date_from = forms.DateField(
         required=False,
         widget=forms.DateInput(attrs={
-            'class': 'form-control',
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent',
             'type': 'date',
             'min': timezone.now().date().isoformat()
         }),
@@ -88,30 +89,98 @@ class AvailabilitySearchForm(forms.Form):
     date_to = forms.DateField(
         required=False,
         widget=forms.DateInput(attrs={
-            'class': 'form-control',
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent',
             'type': 'date'
         }),
         label='To Date'
     )
     
-    park = forms.CharField(
+    park = forms.ModelChoiceField(
+        queryset=Park.objects.all(),
         required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Search by park name'
+        empty_label="All Parks",
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent'
         }),
-        label='Park'
+        label='Park/Location'
+    )
+    
+    guide = forms.ModelChoiceField(
+        queryset=Guide.objects.select_related('user').all(),
+        required=False,
+        empty_label="Any Guide",
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent'
+        }),
+        label='Preferred Guide'
     )
     
     min_slots = forms.IntegerField(
         required=False,
         min_value=1,
         widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Minimum available slots'
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent',
+            'min': '1',
+            'placeholder': 'Any'
         }),
-        label='Minimum Available Slots'
+        label='Min. Slots'
     )
+    
+    price_range = forms.ChoiceField(
+        required=False,
+        choices=[
+            ('', 'Any Price'),
+            ('0-100', 'Under $100'),
+            ('100-200', '$100 - $200'),
+            ('200-500', '$200 - $500'),
+            ('500+', '$500+'),
+        ],
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent'
+        }),
+        label='Price Range'
+    )
+    
+    duration = forms.ChoiceField(
+        required=False,
+        choices=[
+            ('', 'Any Duration'),
+            ('0-4', 'Half Day (Under 4h)'),
+            ('4-8', 'Full Day (4-8h)'),
+            ('8+', 'Multi-Day (8h+)'),
+        ],
+        widget=forms.Select(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent'
+        }),
+        label='Duration'
+    )
+    
+    search_query = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent',
+            'placeholder': 'Search tours, parks, or descriptions...'
+        }),
+        label='Search'
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Custom display for guide choices
+        guide_choices = [('', 'Any Guide')]
+        for guide in Guide.objects.select_related('user').all():
+            if guide.user.first_name:
+                display_name = f"{guide.user.first_name} {guide.user.last_name or ''}".strip()
+                if guide.specialization:
+                    display_name += f" - {guide.specialization}"
+            else:
+                display_name = guide.user.username
+                if guide.specialization:
+                    display_name += f" - {guide.specialization}"
+            guide_choices.append((guide.id, display_name))
+        
+        self.fields['guide'].choices = guide_choices
     
     def clean(self):
         cleaned_data = super().clean()

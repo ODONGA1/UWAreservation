@@ -13,23 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='booking',
-            name='availability',
-        ),
-        migrations.RemoveField(
-            model_name='booking',
-            name='tourist',
-        ),
-        migrations.AlterField(
-            model_name='guide',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.DeleteModel(
-            name='Availability',
-        ),
-        migrations.DeleteModel(
-            name='Booking',
-        ),
+        # This migration has been completely disabled due to model conflicts
+        # All operations removed to prevent migration errors
     ]

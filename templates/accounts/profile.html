@@ -119,6 +119,38 @@
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                     <span>My Bookings</span>
                 </a>
+                
+                <!-- UWA Staff Only: User Management Button -->
+                {% if profile.is_staff %}
+                    <a href="{% url 'accounts:manage_users' %}" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Manage Users</span>
+                    </a>
+                {% endif %}
+                
+                <!-- Tour Operators and UWA Staff: Park Management -->
+                {% if profile.is_operator or profile.is_staff %}
+                    <a href="{% url 'tours:park_list' %}" class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i data-lucide="map" class="w-4 h-4"></i>
+                        <span>Browse Parks</span>
+                    </a>
+                    <a href="{% url 'tours:tour_list' %}" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i data-lucide="compass" class="w-4 h-4"></i>
+                        <span>Browse Tours</span>
+                    </a>
+                    {% if user.profile.is_staff %}
+                    <a href="{% url 'tours:manage_parks' %}" class="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-700 hover:to-orange-800 transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>Parks Management</span>
+                    </a>
+                    {% endif %}
+                    {% if user.profile.is_operator %}
+                    <a href="{% url 'tours:manage_tours' %}" class="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-700 hover:to-orange-800 transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>Tours Management</span>
+                    </a>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,0 +1,19 @@
+{% if specific_ratings %}
+<div class="specific-ratings">
+    <h3 class="text-lg font-semibold mb-3">Rating Categories</h3>
+    
+    <div class="space-y-3">
+        {% for label, value in specific_ratings.items %}
+            <div class="flex items-center justify-between">
+                <span class="text-gray-600">{{ label }}</span>
+                <div class="flex items-center">
+                    <div class="w-24 h-2 bg-gray-200 rounded overflow-hidden mr-2">
+                        <div class="h-full bg-yellow-400" style="width: {% widthratio value 5 100 %}%"></div>
+                    </div>
+                    <span class="font-medium">{{ value|floatformat:1 }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

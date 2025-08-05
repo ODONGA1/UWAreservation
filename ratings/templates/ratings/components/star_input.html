@@ -1,0 +1,93 @@
+{% comment %}
+Usage: {% include "ratings/components/star_input.html" with name="rating_field" value=initial_value %}
+{% endcomment %}
+
+<div class="star-rating-input" data-name="{{ name }}" data-value="{{ value|default:'0' }}">
+    <input type="hidden" name="{{ name }}" value="{{ value|default:'0' }}" id="id_{{ name }}">
+    <div class="flex items-center">
+        {% for i in "12345" %}
+            <button type="button" 
+                   class="star-btn p-1 focus:outline-none" 
+                   data-value="{{ forloop.counter }}" 
+                   aria-label="Rate {{ forloop.counter }} stars">
+                <svg class="w-8 h-8 {% if forloop.counter <= value|default:0 %}text-yellow-400 fill-current{% else %}text-gray-300{% endif %}" 
+                     viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                </svg>
+            </button>
+        {% endfor %}
+        <span class="ml-2 text-sm font-medium text-gray-700 star-rating-text">
+            {% if value|default:0 == 0 %}
+                Not rated
+            {% elif value == 1 %}
+                Poor
+            {% elif value == 2 %}
+                Fair
+            {% elif value == 3 %}
+                Average
+            {% elif value == 4 %}
+                Good
+            {% elif value == 5 %}
+                Excellent
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.star-rating-input').forEach(function(container) {
+            const input = container.querySelector('input[type="hidden"]');
+            const stars = container.querySelectorAll('.star-btn');
+            const ratingText = container.querySelector('.star-rating-text');
+            
+            const ratingTexts = {
+                0: 'Not rated',
+                1: 'Poor',
+                2: 'Fair',
+                3: 'Average',
+                4: 'Good',
+                5: 'Excellent'
+            };
+            
+            // Set up event listeners for each star
+            stars.forEach(function(star) {
+                // Hover effect
+                star.addEventListener('mouseenter', function() {
+                    const value = parseInt(this.dataset.value);
+                    updateStarsDisplay(value, true);
+                });
+                
+                // Click to set value
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.dataset.value);
+                    input.value = value;
+                    updateStarsDisplay(value, false);
+                    if (ratingText) {
+                        ratingText.textContent = ratingTexts[value];
+                    }
+                });
+            });
+            
+            // Reset on mouse leave
+            container.addEventListener('mouseleave', function() {
+                updateStarsDisplay(parseInt(input.value), false);
+            });
+            
+            function updateStarsDisplay(activeValue, isHover) {
+                stars.forEach(function(star, index) {
+                    const starValue = parseInt(star.dataset.value);
+                    const svg = star.querySelector('svg');
+                    
+                    if (starValue <= activeValue) {
+                        svg.classList.add('text-yellow-400', 'fill-current');
+                        svg.classList.remove('text-gray-300');
+                    } else {
+                        svg.classList.remove('text-yellow-400', 'fill-current');
+                        svg.classList.add('text-gray-300');
+                    }
+                });
+            }
+        });
+    });
+</script>

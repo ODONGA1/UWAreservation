@@ -1,7 +1,7 @@
 # In tours/admin.py
 from django.contrib import admin
 from django.contrib.auth.models import User
-from .models import Park, Tour, Guide
+from .models import Park, Tour, Guide, TourCompany
 
 class GuideAdmin(admin.ModelAdmin):
     list_display = ['user', 'specialization', 'get_user_email']
@@ -20,6 +20,28 @@ class GuideAdmin(admin.ModelAdmin):
             # kwargs["queryset"] = User.objects.filter(profile__role='guide')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-admin.site.register(Park)
-admin.site.register(Tour)
+class TourCompanyAdmin(admin.ModelAdmin):
+    list_display = ['name', 'is_uwa', 'license_number', 'website', 'operator_count']
+    list_filter = ['is_uwa']
+    search_fields = ['name', 'license_number']
+    filter_horizontal = ['operators']
+    
+    def operator_count(self, obj):
+        return obj.operators.count()
+    operator_count.short_description = 'Operators'
+
+class ParkAdmin(admin.ModelAdmin):
+    list_display = ['name', 'location']
+    list_filter = ['location']
+    search_fields = ['name', 'description', 'location']
+
+class TourAdmin(admin.ModelAdmin):
+    list_display = ['name', 'park', 'company', 'price', 'duration_hours', 'created_by']
+    list_filter = ['company', 'park']
+    search_fields = ['name', 'description', 'company__name']
+    autocomplete_fields = ['company', 'park']
+
+admin.site.register(Park, ParkAdmin)
+admin.site.register(Tour, TourAdmin)
 admin.site.register(Guide, GuideAdmin)
+admin.site.register(TourCompany, TourCompanyAdmin)

@@ -1,0 +1,1045 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Tour: {{ tour.name }}{% endblock %}
+
+{% block extra_css %}
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+    /* Simple clean styling to match tour_form.html */
+    .form-input {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-safari-500 focus:border-safari-500 transition-colors duration-200;
+    }
+
+    .form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+
+    .btn-primary {
+        @apply px-6 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors;
+    }
+    
+    .btn-secondary {
+        @apply px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors;
+    }
+    
+    .btn-success {
+        @apply px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors;
+    }
+    
+    .btn-danger {
+        @apply px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm;
+    }
+
+    /* Modal Styles */
+    .modal-backdrop {
+        @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+    }
+
+    .modal-content {
+        @apply bg-white rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto;
+    }
+
+    .modal-header {
+        @apply bg-safari-600 text-white p-6 flex items-center justify-between;
+    }
+
+    .modal-body {
+        @apply p-6;
+    }
+
+    .modal-footer {
+        @apply bg-gray-50 px-6 py-4 flex items-center justify-end gap-3;
+    }
+
+    /* Alert Styles */
+    .alert-info {
+        @apply bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg flex items-start gap-3;
+    }
+
+    .alert-warning {
+        @apply bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg flex items-start gap-3;
+    }
+
+    .alert-danger {
+        @apply bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg flex items-start gap-3;
+    }
+
+    .alert-success {
+        @apply bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg flex items-start gap-3;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        @apply inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+        @apply fixed top-4 right-4 z-50;
+    }
+
+    .toast {
+        @apply bg-white border border-gray-200 rounded-lg shadow-lg p-4 mb-3 max-w-md;
+    }
+
+    .toast-success {
+        @apply border-l-4 border-green-500;
+    }
+
+    .toast-error {
+        @apply border-l-4 border-red-500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-4 mb-4">
+                <a href="{% url 'tours:manage_tours' %}" class="text-safari-600 hover:text-safari-700">
+                    <i class="fas fa-arrow-left w-6 h-6"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Edit Tour</h1>
+                    <p class="text-gray-600">Update tour details and availability</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form -->
+            <div class="lg:col-span-2">
+                <form method="post" enctype="multipart/form-data" id="tourForm" class="bg-white rounded-lg shadow p-6 space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Form Errors Display -->
+                    {% if form.errors %}
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                            <h3 class="text-red-800 font-medium mb-2">Please correct the following errors:</h3>
+                            {% for field, errors in form.errors.items %}
+                                <div class="text-red-700 text-sm">
+                                    <strong>{{ field|title }}:</strong>
+                                    {% for error in errors %}
+                                        {{ error }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Tour Name -->
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            Tour Name *
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Park Selection -->
+                    <div>
+                        <label for="{{ form.park.id_for_label }}" class="form-label">
+                            National Park *
+                        </label>
+                        {{ form.park }}
+                        {% if form.park.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.park.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-gray-500 mt-1">Select the park where this tour will take place</div>
+                    </div>
+
+                    <!-- Company Selection -->
+                    <div>
+                        <label for="{{ form.company.id_for_label }}" class="form-label">
+                            Tour Company *
+                        </label>
+                        {{ form.company }}
+                        {% if form.company.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.company.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-gray-500 mt-1">Select the company organizing this tour</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            Tour Description *
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-gray-500 mt-1">Describe what visitors will experience on this tour</div>
+                    </div>
+
+                    <!-- Price and Duration Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ form.price.id_for_label }}" class="form-label">
+                                Price (USD) *
+                            </label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.price.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">Price per person in US dollars</div>
+                        </div>
+                        <div>
+                            <label for="{{ form.duration_hours.id_for_label }}" class="form-label">
+                                Duration (Hours) *
+                            </label>
+                            {{ form.duration_hours }}
+                            {% if form.duration_hours.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.duration_hours.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">Duration in hours</div>
+                        </div>
+                    </div>
+
+                    <!-- Max Participants and Difficulty -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ form.max_participants.id_for_label }}" class="form-label">
+                                Maximum Participants *
+                            </label>
+                            {{ form.max_participants }}
+                            {% if form.max_participants.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.max_participants.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">Maximum number of people allowed on this tour</div>
+                        </div>
+                        <div>
+                            <label for="{{ form.difficulty_level.id_for_label }}" class="form-label">
+                                Difficulty Level *
+                            </label>
+                            {{ form.difficulty_level }}
+                            {% if form.difficulty_level.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.difficulty_level.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">Physical difficulty level required</div>
+                        </div>
+                    </div>
+
+                    <!-- Tour Image -->
+                    <div>
+                        <label for="{{ form.image.id_for_label }}" class="form-label">
+                            Tour Image
+                            <span class="text-sm text-gray-500 font-normal">(JPEG, JPG, PNG, WebP - Max 20MB)</span>
+                        </label>
+                        
+                        <!-- Upload Container -->
+                        <div class="relative">
+                            {{ form.image }}
+                            
+                            <!-- Upload Progress Bar -->
+                            <div id="upload-progress" class="hidden mt-2">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="progress-bar" class="bg-safari-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-600 mt-1">
+                                    <span id="upload-status">Uploading...</span>
+                                    <span id="upload-percentage">0%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Upload Success/Error Messages -->
+                            <div id="upload-message" class="hidden mt-2 p-2 rounded-lg text-sm"></div>
+                        </div>
+                        
+                        {% if form.image.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.image.errors.0 }}</div>
+                        {% endif %}
+                        
+                        <!-- Current Image Preview -->
+                        {% if tour.image %}
+                            <div class="mt-3">
+                                <div class="text-sm text-gray-500 mb-2">Current image:</div>
+                                <div class="relative inline-block">
+                                    <img id="current-image" src="{{ tour.image.url }}" alt="{{ tour.name }}" class="w-32 h-32 object-cover rounded-lg border">
+                                    <div class="absolute top-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded">
+                                        Current
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Image Preview for New Upload -->
+                        <div id="new-image-preview" class="hidden mt-3">
+                            <div class="text-sm text-gray-500 mb-2">New image preview:</div>
+                            <div class="relative inline-block">
+                                <img id="preview-image" src="" alt="Preview" class="w-32 h-32 object-cover rounded-lg border">
+                                <div class="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded">
+                                    New
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- File Type and Size Info -->
+                        <div class="text-xs text-gray-500 mt-2">
+                            <p><strong>Supported formats:</strong> JPEG, JPG, PNG, WebP</p>
+                            <p><strong>Maximum size:</strong> 20MB</p>
+                            <p><strong>Recommended:</strong> 800x600 pixels or larger for best quality</p>
+                        </div>
+                        
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between pt-6 border-t border-gray-200">
+                        <a href="{% url 'tours:manage_tours' %}" class="btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save w-4 h-4 inline mr-2"></i>
+                            Update Tour
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Availability Management Section -->
+                <div class="bg-white rounded-lg shadow p-6 mt-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-medium text-gray-900">Availability Management</h3>
+                        <button type="button" onclick="openAddModal()" class="btn-success">
+                            <i class="fas fa-plus mr-2"></i>Add New Date
+                        </button>
+                    </div>
+                    
+                    <!-- Availability Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-blue-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-blue-600">{{ availabilities.count }}</div>
+                            <div class="text-sm text-blue-600">Total Dates</div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-green-600">
+                                {% for avail in availabilities %}{{ avail.slots_available|add:0 }}{% empty %}0{% endfor %}
+                            </div>
+                            <div class="text-sm text-green-600">Available Slots</div>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-purple-600">
+                                {% for avail in availabilities %}{{ avail.bookings.count|add:0 }}{% empty %}0{% endfor %}
+                            </div>
+                            <div class="text-sm text-purple-600">Total Bookings</div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        {% if availabilities %}
+                            {% for availability in availabilities %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-availability-id="{{ availability.id }}">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                                    <div>
+                                        <div class="text-sm text-gray-500">Date</div>
+                                        <div class="font-medium">{{ availability.date|date:"M d, Y" }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-gray-500">Available Slots</div>
+                                        <div class="font-medium">{{ availability.slots_available }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-gray-500">Guide</div>
+                                        <div class="font-medium">
+                                            {% if availability.guide %}
+                                                {{ availability.guide.user.get_full_name }}
+                                            {% else %}
+                                                <span class="text-gray-400">No guide assigned</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <div class="text-sm text-gray-500">Bookings</div>
+                                            <div class="font-medium">{{ availability.bookings.count }}</div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button type="button" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700" 
+                                                    data-availability-id="{{ availability.id }}"
+                                                    data-date="{{ availability.date|date:'Y-m-d' }}"
+                                                    data-slots="{{ availability.slots_available }}"
+                                                    data-guide-id="{% if availability.guide %}{{ availability.guide.id }}{% endif %}"
+                                                    onclick="openEditModal(this)">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn-danger" 
+                                                    data-availability-id="{{ availability.id }}"
+                                                    onclick="deleteAvailability(this)">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <div>
+                                    <strong>No availability dates set!</strong>
+                                    <p class="mb-0">Add some availability dates to allow customers to book this tour.</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Tour Statistics -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Tour Statistics</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Price:</span>
+                            <span class="font-medium">${{ tour.price }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Duration:</span>
+                            <span class="font-medium">{{ tour.duration_hours }}h</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Max Participants:</span>
+                            <span class="font-medium">{{ tour.max_participants }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Difficulty:</span>
+                            <span class="font-medium">{{ tour.difficulty_level|title }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Park:</span>
+                            <span class="font-medium">{{ tour.park.name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button type="button" onclick="openAddModal()" class="w-full btn-success">
+                            <i class="fas fa-calendar-plus mr-2"></i>Add Availability
+                        </button>
+                        <a href="{% url 'tours:tour_detail' tour.id %}" class="w-full btn-primary block text-center">
+                            <i class="fas fa-eye mr-2"></i>Preview Tour
+                        </a>
+                        <a href="{% url 'tours:manage_tours' %}" class="w-full btn-secondary block text-center">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Availability Modal -->
+<div id="addAvailabilityModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="text-xl font-bold flex items-center gap-2">
+                <i class="fas fa-calendar-plus"></i> Add New Availability
+            </h5>
+            <button type="button" onclick="closeAddModal()" class="text-white hover:text-gray-200">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert-info mb-4">
+                <i class="fas fa-info-circle"></i>
+                <strong>Adding availability for:</strong> {{ tour.name }}
+            </div>
+            <form id="addAvailabilityForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-calendar mr-2"></i>Date
+                        </label>
+                        <input type="date" class="form-input" id="availability_date" required>
+                        <small class="text-gray-500">Select a future date for this tour</small>
+                    </div>
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-users mr-2"></i>Available Slots
+                        </label>
+                        <input type="number" class="form-input" id="availability_slots" 
+                               min="1" max="{{ tour.max_participants }}" required
+                               placeholder="Enter number of slots">
+                        <small class="text-gray-500">Max: {{ tour.max_participants }} participants</small>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">
+                        <i class="fas fa-user-tie mr-2"></i>Assign Guide (Optional)
+                    </label>
+                    <select class="form-input" id="availability_guide">
+                        <option value="">No guide assigned</option>
+                        {% for guide in guides %}
+                        <option value="{{ guide.id }}">
+                            {{ guide.user.get_full_name }} 
+                            {% if guide.specialization %}({{ guide.specialization }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-gray-500">You can assign a guide now or later</small>
+                </div>
+            </form>
+            <div id="addAvailabilityErrors" class="alert-danger hidden mt-4"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeAddModal()" class="btn-secondary">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </button>
+            <button type="button" onclick="addAvailability()" id="addAvailabilityBtn" class="btn-success">
+                <i class="fas fa-plus mr-2"></i>
+                <span class="loading-spinner hidden"></span>
+                Add Availability
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Availability Modal -->
+<div id="editAvailabilityModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="text-xl font-bold flex items-center gap-2">
+                <i class="fas fa-edit"></i> Edit Availability
+            </h5>
+            <button type="button" onclick="closeEditModal()" class="text-white hover:text-gray-200">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert-warning mb-4">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Editing availability:</strong> Changes may affect existing bookings
+            </div>
+            <form id="editAvailabilityForm" class="space-y-4">
+                <input type="hidden" id="edit_availability_id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-calendar mr-2"></i>Date
+                        </label>
+                        <input type="date" class="form-input" id="edit_availability_date" required>
+                        <small class="text-gray-500">Select a future date for this tour</small>
+                    </div>
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-users mr-2"></i>Available Slots
+                        </label>
+                        <input type="number" class="form-input" id="edit_availability_slots" 
+                               min="1" max="{{ tour.max_participants }}" required>
+                        <small class="text-gray-500">Max: {{ tour.max_participants }} participants</small>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">
+                        <i class="fas fa-user-tie mr-2"></i>Assign Guide (Optional)
+                    </label>
+                    <select class="form-input" id="edit_availability_guide">
+                        <option value="">No guide assigned</option>
+                        {% for guide in guides %}
+                        <option value="{{ guide.id }}">
+                            {{ guide.user.get_full_name }}
+                            {% if guide.specialization %}({{ guide.specialization }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+            <div id="editAvailabilityErrors" class="alert-danger hidden mt-4"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeEditModal()" class="btn-secondary">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </button>
+            <button type="button" onclick="editAvailability()" id="editAvailabilityBtn" class="btn-primary">
+                <i class="fas fa-save mr-2"></i>
+                <span class="loading-spinner hidden"></span>
+                Update Availability
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Modal Management
+function openAddModal() {
+    document.getElementById('addAvailabilityModal').classList.remove('hidden');
+    document.getElementById('addAvailabilityErrors').classList.add('hidden');
+    document.getElementById('addAvailabilityForm').reset();
+}
+
+function closeAddModal() {
+    document.getElementById('addAvailabilityModal').classList.add('hidden');
+}
+
+function openEditModal(button) {
+    const availabilityId = button.getAttribute('data-availability-id');
+    const date = button.getAttribute('data-date');
+    const slots = button.getAttribute('data-slots');
+    const guideId = button.getAttribute('data-guide-id');
+    
+    document.getElementById('edit_availability_id').value = availabilityId;
+    document.getElementById('edit_availability_date').value = date;
+    document.getElementById('edit_availability_slots').value = slots;
+    document.getElementById('edit_availability_guide').value = guideId || '';
+    document.getElementById('editAvailabilityErrors').classList.add('hidden');
+    
+    document.getElementById('editAvailabilityModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editAvailabilityModal').classList.add('hidden');
+}
+
+// Toast notifications
+function showToast(message, type = 'success') {
+    const toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container';
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} flex items-center gap-3`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle text-green-600' : 'exclamation-circle text-red-600'}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    document.body.appendChild(toastContainer);
+    
+    setTimeout(() => {
+        if (toastContainer.parentElement) {
+            toastContainer.remove();
+        }
+    }, 5000);
+}
+
+function showError(containerId, message) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+    container.classList.remove('hidden');
+}
+
+function hideError(containerId) {
+    document.getElementById(containerId).classList.add('hidden');
+}
+
+function showLoading(buttonId) {
+    const button = document.getElementById(buttonId);
+    const spinner = button.querySelector('.loading-spinner');
+    const icon = button.querySelector('i:not(.loading-spinner)');
+    
+    if (spinner) spinner.classList.remove('hidden');
+    if (icon) icon.classList.add('hidden');
+    button.disabled = true;
+}
+
+function hideLoading(buttonId) {
+    const button = document.getElementById(buttonId);
+    const spinner = button.querySelector('.loading-spinner');
+    const icon = button.querySelector('i:not(.loading-spinner)');
+    
+    if (spinner) spinner.classList.add('hidden');
+    if (icon) icon.classList.remove('hidden');
+    button.disabled = false;
+}
+
+// Form validation
+function validateAvailabilityForm(dateId, slotsId) {
+    const date = document.getElementById(dateId).value;
+    const slots = document.getElementById(slotsId).value;
+    
+    if (!date) {
+        return { valid: false, message: 'Please select a date for the availability.' };
+    }
+    
+    if (!slots || slots < 1) {
+        return { valid: false, message: 'Please enter a valid number of slots (at least 1).' };
+    }
+    
+    if (slots > {{ tour.max_participants }}) {
+        return { valid: false, message: 'Slots cannot exceed the tour maximum of {{ tour.max_participants }} participants.' };
+    }
+    
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+        return { valid: false, message: 'Please select a future date.' };
+    }
+    
+    return { valid: true };
+}
+
+// Add Availability
+function addAvailability() {
+    hideError('addAvailabilityErrors');
+    
+    const validation = validateAvailabilityForm('availability_date', 'availability_slots');
+    if (!validation.valid) {
+        showError('addAvailabilityErrors', validation.message);
+        return;
+    }
+    
+    const date = document.getElementById('availability_date').value;
+    const slots = document.getElementById('availability_slots').value;
+    const guideId = document.getElementById('availability_guide').value;
+    
+    showLoading('addAvailabilityBtn');
+    
+    fetch(`/tours/manage/tours/{{ tour.id }}/availability/add/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            date: date,
+            slots_available: parseInt(slots),
+            guide_id: guideId || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('addAvailabilityBtn');
+        
+        if (data.success) {
+            showToast('Availability added successfully!');
+            closeAddModal();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showError('addAvailabilityErrors', data.error || 'An error occurred while adding availability.');
+        }
+    })
+    .catch(error => {
+        hideLoading('addAvailabilityBtn');
+        console.error('Error:', error);
+        showError('addAvailabilityErrors', 'A network error occurred. Please try again.');
+    });
+}
+
+// Edit Availability
+function editAvailability() {
+    hideError('editAvailabilityErrors');
+    
+    const validation = validateAvailabilityForm('edit_availability_date', 'edit_availability_slots');
+    if (!validation.valid) {
+        showError('editAvailabilityErrors', validation.message);
+        return;
+    }
+    
+    const availabilityId = document.getElementById('edit_availability_id').value;
+    const date = document.getElementById('edit_availability_date').value;
+    const slots = document.getElementById('edit_availability_slots').value;
+    const guideId = document.getElementById('edit_availability_guide').value;
+    
+    showLoading('editAvailabilityBtn');
+    
+    fetch(`/tours/manage/availability/${availabilityId}/edit/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            date: date,
+            slots_available: parseInt(slots),
+            guide_id: guideId || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('editAvailabilityBtn');
+        
+        if (data.success) {
+            showToast('Availability updated successfully!');
+            closeEditModal();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showError('editAvailabilityErrors', data.error || 'An error occurred while updating availability.');
+        }
+    })
+    .catch(error => {
+        hideLoading('editAvailabilityBtn');
+        console.error('Error:', error);
+        showError('editAvailabilityErrors', 'A network error occurred. Please try again.');
+    });
+}
+
+// Delete Availability
+function deleteAvailability(button) {
+    const availabilityId = button.getAttribute('data-availability-id');
+    const availabilityItem = button.closest('[data-availability-id]');
+    const dateText = availabilityItem.querySelector('.font-medium').textContent;
+    
+    if (confirm(`Are you sure you want to delete the availability for ${dateText}?\n\nThis action cannot be undone and may affect existing bookings.`)) {
+        button.innerHTML = '<i class="fas fa-spinner animate-spin"></i>';
+        button.disabled = true;
+        
+        fetch(`/tours/manage/availability/${availabilityId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Availability deleted successfully!');
+                availabilityItem.style.transition = 'all 0.3s ease';
+                availabilityItem.style.opacity = '0';
+                availabilityItem.style.transform = 'translateX(-100%)';
+                
+                setTimeout(() => {
+                    availabilityItem.remove();
+                    const remainingItems = document.querySelectorAll('[data-availability-id]');
+                    if (remainingItems.length === 0) {
+                        location.reload();
+                    }
+                }, 300);
+            } else {
+                showToast(data.error || 'An error occurred while deleting availability.', 'error');
+                button.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('A network error occurred. Please try again.', 'error');
+            button.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            button.disabled = false;
+        });
+    }
+}
+
+// Close modals when clicking outside
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-backdrop')) {
+        closeAddModal();
+        closeEditModal();
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAddModal();
+        closeEditModal();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        document.getElementById('tourForm').requestSubmit();
+    }
+});
+
+// Apply form input styles to Django form fields
+document.addEventListener('DOMContentLoaded', function() {
+    const formInputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], input[type="file"], select, textarea');
+    formInputs.forEach(input => {
+        input.classList.add('form-input');
+    });
+    
+    // Image Upload Handling
+    const imageInput = document.getElementById('tour-image-upload');
+    
+    if (imageInput) {
+        // Remove any existing event listeners
+        imageInput.removeEventListener('change', handleImageUploadEvent);
+        
+        // Add the event listener
+        imageInput.addEventListener('change', handleImageUploadEvent);
+        
+        // Also add drag and drop support for better UX
+        imageInput.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.backgroundColor = '#f0f9ff';
+        });
+        
+        imageInput.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.backgroundColor = '';
+        });
+        
+        imageInput.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.backgroundColor = '';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageUpload(files[0]);
+            }
+        });
+    } else {
+        console.error('Image input element not found!');
+    }
+});
+
+// Separate function for the event handler to make debugging easier
+function handleImageUploadEvent(e) {
+    if (e.target.files.length > 0) {
+        // Use full handler with progress bar
+        handleImageUpload(e.target.files[0]);
+    }
+}
+
+// Image Upload Functions
+function handleImageUpload(file) {
+    const uploadProgress = document.getElementById('upload-progress');
+    const uploadMessage = document.getElementById('upload-message');
+    const newImagePreview = document.getElementById('new-image-preview');
+    const previewImage = document.getElementById('preview-image');
+    
+    // Reset UI state
+    uploadProgress.classList.add('hidden');
+    uploadMessage.classList.add('hidden');
+    newImagePreview.classList.add('hidden');
+    
+    // Reset progress bar
+    const progressBar = document.getElementById('progress-bar');
+    if (progressBar) {
+        progressBar.style.width = '0%';
+        progressBar.className = 'bg-safari-600 h-2 rounded-full transition-all duration-300';
+    }
+    
+    if (!file) {
+        return;
+    }
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        showUploadMessage('❌ Invalid file type. Please select a JPEG, JPG, PNG, or WebP image.', 'error');
+        return;
+    }
+    
+    // Validate file size (20MB)
+    const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+    if (file.size > maxSize) {
+        showUploadMessage('❌ File too large. Please select an image smaller than 20MB.', 'error');
+        return;
+    }
+    
+    // Show file info immediately
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+    showUploadMessage(`📁 File selected: ${file.name} (${fileSizeMB}MB)`, 'info');
+    
+    // Start progress simulation immediately
+    simulateUploadProgress();
+    
+    // Show image preview (this can run in parallel)
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        newImagePreview.classList.remove('hidden');
+    };
+    reader.onerror = function() {
+        console.error('Error reading file for preview');
+        showUploadMessage('⚠️ Error reading file for preview', 'error');
+    };
+    reader.readAsDataURL(file);
+}
+
+function showUploadMessage(message, type) {
+    const uploadMessage = document.getElementById('upload-message');
+    uploadMessage.textContent = message;
+    uploadMessage.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+    
+    if (type === 'error') {
+        uploadMessage.classList.add('bg-red-100', 'text-red-700');
+    } else if (type === 'success') {
+        uploadMessage.classList.add('bg-green-100', 'text-green-700');
+    } else {
+        uploadMessage.classList.add('bg-blue-100', 'text-blue-700');
+    }
+}
+
+function simulateUploadProgress() {
+    const uploadProgress = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const uploadStatus = document.getElementById('upload-status');
+    const uploadPercentage = document.getElementById('upload-percentage');
+    
+    // Show progress immediately
+    uploadProgress.classList.remove('hidden');
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        // Slower, more gradual progress increments
+        progress += Math.random() * 3 + 1; // 1-4% increments instead of 0-15%
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = progress + '%';
+        uploadPercentage.textContent = Math.round(progress) + '%';
+        
+        // Update status based on progress
+        if (progress < 20) {
+            uploadStatus.textContent = 'Analyzing file...';
+            progressBar.className = 'bg-blue-600 h-2 rounded-full transition-all duration-300';
+        } else if (progress < 40) {
+            uploadStatus.textContent = 'Validating file type...';
+            progressBar.className = 'bg-yellow-600 h-2 rounded-full transition-all duration-300';
+        } else if (progress < 60) {
+            uploadStatus.textContent = 'Checking file size...';
+            progressBar.className = 'bg-orange-600 h-2 rounded-full transition-all duration-300';
+        } else if (progress < 80) {
+            uploadStatus.textContent = 'Preparing for upload...';
+            progressBar.className = 'bg-safari-600 h-2 rounded-full transition-all duration-300';
+        } else if (progress < 100) {
+            uploadStatus.textContent = 'Processing image...';
+            progressBar.className = 'bg-green-600 h-2 rounded-full transition-all duration-300';
+        } else {
+            uploadStatus.textContent = 'Ready to save!';
+            progressBar.className = 'bg-green-600 h-2 rounded-full transition-all duration-300';
+            clearInterval(interval);
+            
+            // Keep progress visible longer and show success message
+            setTimeout(() => {
+                showUploadMessage('✅ Image processed successfully! Click "Update Tour" to save changes.', 'success');
+                // Don't hide the progress bar - let it stay visible with 100%
+            }, 500);
+        }
+    }, 300); // Slower interval - 300ms instead of 200ms
+}
+
+// Form submission enhancement
+const tourForm = document.getElementById('tourForm');
+if (tourForm) {
+    tourForm.addEventListener('submit', function(e) {
+        const imageInput = document.getElementById('tour-image-upload');
+        
+        if (imageInput && imageInput.files.length > 0) {
+            // Show actual upload progress if file is selected
+            const uploadProgress = document.getElementById('upload-progress');
+            const uploadStatus = document.getElementById('upload-status');
+            if (uploadProgress && uploadStatus) {
+                uploadProgress.classList.remove('hidden');
+                uploadStatus.textContent = 'Uploading tour data...';
+            }
+        }
+        
+        // Don't prevent default - let the form submit normally
+    });
+}
+</script>
+{% endblock %}

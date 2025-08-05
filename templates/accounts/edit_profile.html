@@ -153,19 +153,21 @@
                         </div>
 
                         <div class="space-y-6">
-                            <!-- Role -->
+                            <!-- Roles -->
                             <div class="space-y-2">
-                                <label for="{{ profile_form.role.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                                <label for="{{ profile_form.roles.id_for_label }}" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
                                     <i data-lucide="user-check" class="w-4 h-4"></i>
-                                    <span>Account Type</span>
+                                    <span>Account Types</span>
                                 </label>
-                                {{ profile_form.role }}
-                                {% if profile_form.role.errors %}
-                                    {% for error in profile_form.role.errors %}
+                                <div class="space-y-2">
+                                    {{ profile_form.roles }}
+                                </div>
+                                {% if profile_form.roles.errors %}
+                                    {% for error in profile_form.roles.errors %}
                                         <p class="text-red-600 text-xs mt-1">{{ error }}</p>
                                     {% endfor %}
                                 {% endif %}
-                                <p class="text-xs text-gray-500">Choose your primary role on our platform</p>
+                                <p class="text-xs text-gray-500">Select all roles that apply to you. You can have multiple roles.</p>
                             </div>
 
                             <!-- Phone Number -->
@@ -196,6 +198,126 @@
                                     {% endfor %}
                                 {% endif %}
                                 <p class="text-xs text-gray-500">Share your passion for wildlife and what makes you an adventure seeker</p>
+                            </div>
+
+                            <!-- Tour Guide Fields -->
+                            <div id="guide-fields" class="space-y-4 border-t pt-4" style="display: none;">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                    <i data-lucide="compass" class="w-5 h-5"></i>
+                                    <span>Tour Guide Information</span>
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label for="{{ profile_form.guide_experience_years.id_for_label }}" class="text-sm font-medium text-gray-700">Years of Experience</label>
+                                        {{ profile_form.guide_experience_years }}
+                                        {% if profile_form.guide_experience_years.errors %}
+                                            {% for error in profile_form.guide_experience_years.errors %}
+                                                <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="space-y-2">
+                                        <label for="{{ profile_form.guide_languages.id_for_label }}" class="text-sm font-medium text-gray-700">Languages Spoken</label>
+                                        {{ profile_form.guide_languages }}
+                                        {% if profile_form.guide_languages.errors %}
+                                            {% for error in profile_form.guide_languages.errors %}
+                                                <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.guide_specializations.id_for_label }}" class="text-sm font-medium text-gray-700">Specializations</label>
+                                    {{ profile_form.guide_specializations }}
+                                    {% if profile_form.guide_specializations.errors %}
+                                        {% for error in profile_form.guide_specializations.errors %}
+                                            <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Tour Operator Fields -->
+                            <div id="operator-fields" class="space-y-4 border-t pt-4" style="display: none;">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                                    <span>Tour Operator Information</span>
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label for="{{ profile_form.operator_company_name.id_for_label }}" class="text-sm font-medium text-gray-700">Company Name</label>
+                                        {{ profile_form.operator_company_name }}
+                                        {% if profile_form.operator_company_name.errors %}
+                                            {% for error in profile_form.operator_company_name.errors %}
+                                                <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="space-y-2">
+                                        <label for="{{ profile_form.operator_license_number.id_for_label }}" class="text-sm font-medium text-gray-700">License Number</label>
+                                        {{ profile_form.operator_license_number }}
+                                        {% if profile_form.operator_license_number.errors %}
+                                            {% for error in profile_form.operator_license_number.errors %}
+                                                <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.operator_website.id_for_label }}" class="text-sm font-medium text-gray-700">Website</label>
+                                    {{ profile_form.operator_website }}
+                                    {% if profile_form.operator_website.errors %}
+                                        {% for error in profile_form.operator_website.errors %}
+                                            <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- UWA Staff Fields -->
+                            <div id="staff-fields" class="space-y-4 border-t pt-4" style="display: none;">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                    <span>UWA Staff Information</span>
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label for="{{ profile_form.staff_employee_id.id_for_label }}" class="text-sm font-medium text-gray-700">Employee ID</label>
+                                        {{ profile_form.staff_employee_id }}
+                                        {% if profile_form.staff_employee_id.errors %}
+                                            {% for error in profile_form.staff_employee_id.errors %}
+                                                <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="space-y-2">
+                                        <label for="{{ profile_form.staff_department.id_for_label }}" class="text-sm font-medium text-gray-700">Department</label>
+                                        {{ profile_form.staff_department }}
+                                        {% if profile_form.staff_department.errors %}
+                                            {% for error in profile_form.staff_department.errors %}
+                                                <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label for="{{ profile_form.staff_position.id_for_label }}" class="text-sm font-medium text-gray-700">Position/Title</label>
+                                    {{ profile_form.staff_position }}
+                                    {% if profile_form.staff_position.errors %}
+                                        {% for error in profile_form.staff_position.errors %}
+                                            <p class="text-red-600 text-xs mt-1">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -285,6 +407,42 @@
                 this.classList.add('border-gray-300');
             }
         });
+    });
+
+    // Role-specific field visibility
+    function toggleRoleFields() {
+        const roleCheckboxes = document.querySelectorAll('input[name="roles"]');
+        const guideFields = document.getElementById('guide-fields');
+        const operatorFields = document.getElementById('operator-fields');
+        const staffFields = document.getElementById('staff-fields');
+        
+        let showGuide = false;
+        let showOperator = false;
+        let showStaff = false;
+        
+        roleCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const value = checkbox.value;
+                if (value === '2') showGuide = true;  // guide role ID
+                if (value === '3') showOperator = true;  // operator role ID  
+                if (value === '4') showStaff = true;  // staff role ID
+            }
+        });
+        
+        guideFields.style.display = showGuide ? 'block' : 'none';
+        operatorFields.style.display = showOperator ? 'block' : 'none';
+        staffFields.style.display = showStaff ? 'block' : 'none';
+    }
+    
+    // Add event listeners to role checkboxes
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleCheckboxes = document.querySelectorAll('input[name="roles"]');
+        roleCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', toggleRoleFields);
+        });
+        
+        // Initial check
+        toggleRoleFields();
     });
 </script>
 {% endblock %}

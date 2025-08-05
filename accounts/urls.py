@@ -29,6 +29,12 @@ urlpatterns = [
     path('wishlist/add/<int:tour_id>/', views.add_to_wishlist, name='add_to_wishlist'),
     path('wishlist/remove/<int:tour_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
     
+    # User management URLs (UWA staff only)
+    path('manage-users/', views.manage_users, name='manage_users'),
+    path('manage-users/edit/<int:user_id>/', views.edit_user, name='edit_user'),
+    path('manage-users/toggle-status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
+    path('manage-users/detail/<int:user_id>/', views.user_detail, name='user_detail'),
+    
     # Support URLs
     path('help/', views.help_support, name='help_support'),
 ]

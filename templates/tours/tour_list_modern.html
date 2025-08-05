@@ -1,26 +1,29 @@
 {% extends 'base.html' %}
 
-{% block title %}Wildlife Tours - Discover Uganda's Natural Wonders{% endblock %}
-{% block description %}Explore Uganda's magnificent wildlife parks with expert guides. Book your adventure through Queen Elizabeth, Murchison Falls, Bwindi and more.{% endblock %}
+{% block title %}Uganda Wildlife Authority - Official Tour Reservations{% endblock %}
+{% block description %}Book official UWA tours including gorilla trekking, chimpanzee tracking, and wildlife safaris in Uganda's 10 national parks. Support conservation while experiencing authentic African wildlife.{% endblock %}
 
 {% block content %}
 {% csrf_token %}
-<!-- Hero Section -->
+
+{% if not user.is_authenticated %}
+<!-- Hero Section - Only shown to non-authenticated users -->
 <section class="relative h-screen flex items-center justify-center bg-hero-pattern bg-cover bg-center bg-fixed">
     <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/40"></div>
     <div class="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
         <h1 class="font-display text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
             Discover
-            <span class="bg-gradient-to-r from-safari-400 to-wildlife-400 bg-clip-text text-transparent">
+            <span class="bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
                 Uganda's
             </span>
             Wildlife
         </h1>
         <p class="text-xl md:text-2xl mb-8 text-gray-200 animate-slide-up">
-            Experience the magic of African wildlife through expertly guided tours in Uganda's most spectacular national parks
+            Official Uganda Wildlife Authority (UWA) tours. Experience authentic conservation tourism 
+            while supporting the protection of Uganda's magnificent wildlife and natural heritage.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
-            <a href="#tours" class="bg-gradient-to-r from-safari-600 to-wildlife-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2">
+            <a href="#tours" class="bg-gradient-to-r from-uwa-600 to-wildlife-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-2">
                 <i data-lucide="binoculars" class="w-5 h-5"></i>
                 <span>Explore Tours</span>
             </a>
@@ -36,21 +39,23 @@
         <i data-lucide="chevron-down" class="w-8 h-8 text-white"></i>
     </div>
 </section>
+{% endif %}
 
 <!-- Search & Filter Section -->
 <section id="tours" class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
             <h2 class="font-display text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Choose Your <span class="text-safari-600">Adventure</span>
+                Choose Your <span class="text-green-600">Conservation Adventure</span>
             </h2>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                From gorilla trekking to safari expeditions, find the perfect wildlife experience that matches your spirit of adventure
+                Explore Uganda's 10 national parks with official UWA-certified guides. From mountain gorilla trekking 
+                to Big Five safaris, every tour supports wildlife conservation and local communities.
             </p>
         </div>
         
         <!-- Enhanced Search Form -->
-        <div class="bg-gradient-to-r from-safari-50 to-wildlife-50 rounded-2xl p-8 mb-12 shadow-lg">
+        <div class="bg-gradient-to-r from-uwa-50 to-wildlife-50 rounded-2xl p-8 mb-12 shadow-lg">
             <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" 
                   hx-get="{% url 'tours:tour_list' %}" 
                   hx-target="#tour-results" 
@@ -64,7 +69,7 @@
                     </label>
                     <input type="text" name="search_query" id="id_search_query" value="{{ form.search_query.value|default:'' }}" 
                            placeholder="Search tours, parks, or descriptions..."
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                 </div>
                 
                 <!-- Date From -->
@@ -74,7 +79,7 @@
                         <span>From Date</span>
                     </label>
                     <input type="date" name="date_from" id="id_date_from" value="{{ form.date_from.value|default:'' }}" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                 </div>
                 
                 <!-- Date To -->
@@ -84,7 +89,7 @@
                         <span>To Date</span>
                     </label>
                     <input type="date" name="date_to" id="id_date_to" value="{{ form.date_to.value|default:'' }}" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                 </div>
                 
                 <!-- Park Selection -->
@@ -93,7 +98,7 @@
                         <i data-lucide="map-pin" class="w-4 h-4"></i>
                         <span>Park/Location</span>
                     </label>
-                    <select name="park" id="id_park" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                    <select name="park" id="id_park" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                         <option value="">All Parks</option>
                         {% for choice in form.park.field.queryset %}
                             <option value="{{ choice.id }}" {% if form.park.value == choice.id|stringformat:"s" or form.park.value == choice.id %}selected{% endif %}>
@@ -109,7 +114,7 @@
                         <i data-lucide="user-check" class="w-4 h-4"></i>
                         <span>Preferred Guide</span>
                     </label>
-                    <select name="guide" id="id_guide" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                    <select name="guide" id="id_guide" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                         <option value="">Any Guide</option>
                         {% for choice in form.guide.field.queryset %}
                             <option value="{{ choice.id }}" {% if form.guide.value == choice.id|stringformat:"s" or form.guide.value == choice.id %}selected{% endif %}>
@@ -131,7 +136,7 @@
                         <i data-lucide="dollar-sign" class="w-4 h-4"></i>
                         <span>Price Range</span>
                     </label>
-                    <select name="price_range" id="id_price_range" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                    <select name="price_range" id="id_price_range" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                         <option value="">Any Price</option>
                         <option value="0-100" {% if form.price_range.value == "0-100" %}selected{% endif %}>Under $100</option>
                         <option value="100-200" {% if form.price_range.value == "100-200" %}selected{% endif %}>$100 - $200</option>
@@ -146,7 +151,7 @@
                         <i data-lucide="clock" class="w-4 h-4"></i>
                         <span>Duration</span>
                     </label>
-                    <select name="duration" id="id_duration" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                    <select name="duration" id="id_duration" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                         <option value="">Any Duration</option>
                         <option value="0-4" {% if form.duration.value == "0-4" %}selected{% endif %}>Half Day (Under 4h)</option>
                         <option value="4-8" {% if form.duration.value == "4-8" %}selected{% endif %}>Full Day (4-8h)</option>
@@ -162,7 +167,7 @@
                     </label>
                     <input type="number" name="min_slots" id="id_min_slots" value="{{ form.min_slots.value|default:'' }}" 
                            min="1" placeholder="Any" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uwa-500 focus:border-transparent">
                 </div>
                 
                 <!-- Action Buttons -->
@@ -171,7 +176,7 @@
                         <i data-lucide="search" class="w-5 h-5"></i>
                         <span>Search Adventures</span>
                     </button>
-                    <button type="button" id="clearFilters" class="border-2 border-gray-300 text-gray-600 px-6 py-3 rounded-lg font-semibold hover:border-safari-600 hover:text-safari-600 transition-all duration-200 flex items-center space-x-2">
+                    <button type="button" id="clearFilters" class="border-2 border-gray-300 text-gray-600 px-6 py-3 rounded-lg font-semibold hover:border-uwa-600 hover:text-uwa-600 transition-all duration-200 flex items-center space-x-2">
                         <i data-lucide="x" class="w-4 h-4"></i>
                         <span>Clear Filters</span>
                     </button>
@@ -187,52 +192,52 @@
         <div id="tour-results">
             <!-- Active Filter Indicator -->
             {% if form.date_from.value or form.date_to.value or form.park.value or form.guide.value or form.price_range.value or form.duration.value or form.search_query.value or form.min_slots.value %}
-                <div class="mb-6 bg-gradient-to-r from-safari-50 to-wildlife-50 border border-safari-200 rounded-lg p-4">
+                <div class="mb-6 bg-gradient-to-r from-uwa-50 to-wildlife-50 border border-uwa-200 rounded-lg p-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-safari-600 rounded-full flex items-center justify-center">
+                            <div class="w-8 h-8 bg-uwa-600 rounded-full flex items-center justify-center">
                                 <i data-lucide="filter" class="w-4 h-4 text-white"></i>
                             </div>
                             <div>
                                 <h4 class="font-semibold text-gray-900">Active Filters</h4>
                                 <div class="text-sm text-gray-600 flex flex-wrap gap-2 mt-1">
                                     {% if form.search_query.value %}
-                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">Search: "{{ form.search_query.value }}"</span>
+                                        <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">Search: "{{ form.search_query.value }}"</span>
                                     {% endif %}
                                     {% if form.date_from.value %}
-                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">From: {{ form.date_from.value|date:"M d, Y" }}</span>
+                                        <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">From: {{ form.date_from.value|date:"M d, Y" }}</span>
                                     {% endif %}
                                     {% if form.date_to.value %}
-                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">To: {{ form.date_to.value|date:"M d, Y" }}</span>
+                                        <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">To: {{ form.date_to.value|date:"M d, Y" }}</span>
                                     {% endif %}
                                     {% if form.park.value %}
                                         {% for park in form.park.field.queryset %}
                                             {% if park.id == form.park.value|add:0 %}
-                                                <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">Park: {{ park.name }}</span>
+                                                <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">Park: {{ park.name }}</span>
                                             {% endif %}
                                         {% endfor %}
                                     {% endif %}
                                     {% if form.guide.value %}
                                         {% for guide in form.guide.field.queryset %}
                                             {% if guide.id == form.guide.value|add:0 %}
-                                                <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">
+                                                <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">
                                                     Guide: {% if guide.user.first_name %}{{ guide.user.first_name }}{% else %}{{ guide.user.username }}{% endif %}
                                                 </span>
                                             {% endif %}
                                         {% endfor %}
                                     {% endif %}
                                     {% if form.price_range.value %}
-                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">
+                                        <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">
                                             Price: {% if form.price_range.value == "0-100" %}Under $100{% elif form.price_range.value == "100-200" %}$100-$200{% elif form.price_range.value == "200-500" %}$200-$500{% elif form.price_range.value == "500+" %}$500+{% endif %}
                                         </span>
                                     {% endif %}
                                     {% if form.duration.value %}
-                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">
+                                        <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">
                                             Duration: {% if form.duration.value == "0-4" %}Half Day{% elif form.duration.value == "4-8" %}Full Day{% elif form.duration.value == "8+" %}Multi-Day{% endif %}
                                         </span>
                                     {% endif %}
                                     {% if form.min_slots.value %}
-                                        <span class="bg-safari-100 text-safari-800 px-2 py-1 rounded-full">Min Slots: {{ form.min_slots.value }}</span>
+                                        <span class="bg-uwa-100 text-uwa-800 px-2 py-1 rounded-full">Min Slots: {{ form.min_slots.value }}</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -308,18 +313,18 @@
                             <!-- Tour Content -->
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-3">
-                                    <span class="bg-safari-100 text-safari-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    <a href="{% url 'tours:park_detail' tour_data.tour.park.id %}" class="bg-uwa-100 text-uwa-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-uwa-200 transition-colors duration-200 cursor-pointer">
                                         {{ tour_data.tour.park.name }}
-                                    </span>
+                                    </a>
                                     <div class="flex items-center space-x-1 text-yellow-400">
                                         <i data-lucide="star" class="w-4 h-4 fill-current"></i>
                                         <span class="text-gray-600 text-sm font-semibold">{{ tour_data.rating }}</span>
                                     </div>
                                 </div>
                                 
-                                <h3 class="font-display text-xl font-bold text-gray-900 mb-2 group-hover:text-safari-600 transition-colors">
+                                <a href="{% url 'tours:tour_detail' tour_data.tour.id %}" class="font-display text-xl font-bold text-gray-900 mb-2 group-hover:text-safari-600 transition-colors hover:text-safari-600 cursor-pointer block">
                                     {{ tour_data.tour.name }}
-                                </h3>
+                                </a>
                                 
                                 <p class="text-gray-600 mb-4 line-clamp-3">
                                     {% if tour_data.tour.description %}
@@ -349,7 +354,7 @@
                                 </div>
                                 
                                 <!-- Availability Summary -->
-                                <div class="bg-gradient-to-r from-safari-50 to-wildlife-50 rounded-lg p-3 mb-4">
+                                <div class="bg-gradient-to-r from-uwa-50 to-wildlife-50 rounded-lg p-3 mb-4">
                                     <div class="flex items-center justify-between text-sm mb-2">
                                         <div class="flex items-center space-x-2">
                                             <i data-lucide="calendar-range" class="w-4 h-4 text-safari-600"></i>
@@ -388,7 +393,7 @@
                                     
                                     <!-- Wishlist button - always visible -->
                                     <button onclick="console.log('Button clicked! Tour ID: {{ tour_data.tour.id }}'); toggleWishlist({{ tour_data.tour.id }}, this)" 
-                                            class="wishlist-btn border-2 {% if user.is_authenticated and tour_data.is_in_wishlist %}wishlist-added bg-red-50 border-red-500 text-red-600{% else %}bg-white border-safari-600 text-safari-600{% endif %} py-3 px-4 rounded-lg font-semibold hover:bg-safari-600 hover:text-white transition-all duration-200 flex items-center justify-center"
+                                            class="wishlist-btn border-2 {% if user.is_authenticated and tour_data.is_in_wishlist %}wishlist-added bg-red-50 border-red-500 text-red-600{% else %}bg-white border-safari-600 text-safari-600{% endif %} py-3 px-4 rounded-lg font-semibold hover:bg-uwa-600 hover:text-white transition-all duration-200 flex items-center justify-center"
                                             data-tour-id="{{ tour_data.tour.id }}"
                                             title="{% if user.is_authenticated and tour_data.is_in_wishlist %}Remove from wishlist{% else %}Add to wishlist{% endif %}">
                                         <i data-lucide="heart" class="w-4 h-4 {% if user.is_authenticated and tour_data.is_in_wishlist %}fill-current{% endif %}"></i>
@@ -426,38 +431,41 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
             <h2 class="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Why Choose <span class="text-safari-600">UWA Tours</span>
+                Why Choose <span class="text-green-600">Official UWA Tours</span>
             </h2>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="text-center p-6">
-                <div class="w-16 h-16 bg-gradient-to-br from-safari-500 to-wildlife-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
                 </div>
-                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Expert Guides</h3>
+                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Official Government Agency</h3>
                 <p class="text-gray-600">
-                    Our certified wildlife experts bring years of experience and deep knowledge of Uganda's ecosystems.
+                    UWA is Uganda's official government agency responsible for wildlife management and conservation, 
+                    supervised by the Ministry of Tourism, Wildlife and Antiquities.
                 </p>
             </div>
             
             <div class="text-center p-6">
-                <div class="w-16 h-16 bg-gradient-to-br from-safari-500 to-wildlife-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="heart" class="w-8 h-8 text-white"></i>
                 </div>
-                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Conservation Focus</h3>
+                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Conservation Impact</h3>
                 <p class="text-gray-600">
-                    Every tour contributes to wildlife conservation and supports local communities protecting Uganda's natural heritage.
+                    Every tour directly supports conservation efforts, community development, and wildlife protection. 
+                    Your visit helps preserve Uganda's natural heritage for future generations.
                 </p>
             </div>
             
             <div class="text-center p-6">
-                <div class="w-16 h-16 bg-gradient-to-br from-safari-500 to-wildlife-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="award" class="w-8 h-8 text-white"></i>
                 </div>
-                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Award Winning</h3>
+                <h3 class="font-display text-xl font-bold text-gray-900 mb-2">World-Class Wildlife</h3>
                 <p class="text-gray-600">
-                    Recognized for excellence in sustainable tourism and unforgettable wildlife experiences.
+                    Home to over half the world's mountain gorillas, 1,073+ bird species, and 350+ mammal species. 
+                    Uganda offers unparalleled wildlife experiences in pristine natural habitats.
                 </p>
             </div>
         </div>
@@ -552,7 +560,7 @@
                     isPastDate 
                         ? 'text-gray-300 cursor-not-allowed' 
                         : isSelected
-                        ? 'bg-safari-600 text-white font-bold shadow-lg'
+                        ? 'bg-uwa-600 text-white font-bold shadow-lg'
                         : isToday
                         ? 'bg-wildlife-100 text-wildlife-800 font-semibold border-2 border-wildlife-400'
                         : 'text-gray-700 hover:bg-safari-100 hover:text-safari-700 font-medium'

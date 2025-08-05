@@ -1,13 +1,26 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.http import JsonResponse
-from .forms import UserEditForm, ProfileEditForm, PasswordChangeForm
-from .models import Profile, Wishlist
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from .forms import UserEditForm, ProfileEditForm, PasswordChangeForm, SignupForm, StaffUserManagementForm, StaffProfileManagementForm
+from .models import Profile, Wishlist, UserRole
+
+
+def is_uwa_staff(user):
+    """Check if user is UWA staff"""
+    if not user.is_authenticated:
+        return False
+    try:
+        profile = user.profile
+        return profile.is_staff()
+    except Profile.DoesNotExist:
+        return False
 
 class CustomLoginView(LoginView):
     """Custom login view with modern template"""
@@ -22,17 +35,11 @@ class CustomLoginView(LoginView):
         return reverse_lazy('tours:tour_list')
 
 def signup(request):
-    """User registration view with modern template"""
+    """Enhanced user registration view with role selection"""
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Set first and last name if provided
-            user.first_name = request.POST.get('first_name', '')
-            user.last_name = request.POST.get('last_name', '')
-            user.email = request.POST.get('email', '')
-            user.save()
-            
             login(request, user)
             messages.success(request, 'Welcome to UWA Wildlife Tours! Your account has been created successfully.')
             
@@ -42,7 +49,7 @@ def signup(request):
                 return redirect(next_url)
             return redirect('tours:tour_list')
     else:
-        form = UserCreationForm()
+        form = SignupForm()
     return render(request, 'accounts/signup_modern.html', {'form': form})
 
 @login_required
@@ -153,7 +160,7 @@ def edit_profile(request):
     
     if request.method == 'POST':
         user_form = UserEditForm(request.POST, instance=request.user)
-        profile_form = ProfileEditForm(request.POST, instance=profile)
+        profile_form = ProfileEditForm(request.POST, instance=profile, user=request.user)
         
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
@@ -162,7 +169,7 @@ def edit_profile(request):
             return redirect('accounts:profile')
     else:
         user_form = UserEditForm(instance=request.user)
-        profile_form = ProfileEditForm(instance=profile)
+        profile_form = ProfileEditForm(instance=profile, user=request.user)
     
     context = {
         'user_form': user_form,
@@ -439,3 +446,148 @@ def get_notifications(request):
             'notifications': [],
             'count': 0
         })
+
+
+@user_passes_test(is_uwa_staff, login_url='accounts:profile')
+def manage_users(request):
+    """User management view for UWA staff"""
+    from django.db import models
+    
+    search_query = request.GET.get('search', '')
+    role_filter = request.GET.get('role', '')
+    status_filter = request.GET.get('status', '')
+    
+    users = User.objects.select_related('profile').prefetch_related('profile__roles')
+    
+    # Apply search filter
+    if search_query:
+        users = users.filter(
+            models.Q(username__icontains=search_query) |
+            models.Q(first_name__icontains=search_query) |
+            models.Q(last_name__icontains=search_query) |
+            models.Q(email__icontains=search_query)
+        )
+    
+    # Apply role filter
+    if role_filter:
+        users = users.filter(profile__roles__name=role_filter)
+    
+    # Apply status filter
+    if status_filter == 'active':
+        users = users.filter(is_active=True)
+    elif status_filter == 'suspended':
+        users = users.filter(is_active=False)
+    
+    # Paginate results
+    paginator = Paginator(users.distinct().order_by('username'), 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get all roles for filter dropdown
+    roles = UserRole.objects.all()
+    
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'role_filter': role_filter,
+        'status_filter': status_filter,
+        'roles': roles,
+        'total_users': users.count(),
+    }
+    return render(request, 'accounts/manage_users.html', context)
+
+
+@user_passes_test(is_uwa_staff, login_url='accounts:profile')
+def edit_user(request, user_id):
+    """Edit user view for UWA staff"""
+    target_user = get_object_or_404(User, id=user_id)
+    profile, created = Profile.objects.get_or_create(user=target_user)
+    
+    if request.method == 'POST':
+        user_form = StaffUserManagementForm(request.POST, instance=target_user)
+        profile_form = StaffProfileManagementForm(request.POST, instance=profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            
+            # Log the action
+            action = "activated" if target_user.is_active else "suspended"
+            messages.success(request, f'User {target_user.username} has been updated successfully. Account is now {action}.')
+            return redirect('accounts:manage_users')
+    else:
+        user_form = StaffUserManagementForm(instance=target_user)
+        profile_form = StaffProfileManagementForm(instance=profile)
+    
+    context = {
+        'target_user': target_user,
+        'user_form': user_form,
+        'profile_form': profile_form,
+    }
+    return render(request, 'accounts/edit_user.html', context)
+
+
+@user_passes_test(is_uwa_staff, login_url='accounts:profile')
+def toggle_user_status(request, user_id):
+    """Toggle user active status (suspend/activate)"""
+    if request.method == 'POST':
+        target_user = get_object_or_404(User, id=user_id)
+        
+        # Prevent staff from deactivating themselves
+        if target_user == request.user:
+            return JsonResponse({
+                'success': False,
+                'message': 'You cannot suspend your own account.'
+            })
+        
+        target_user.is_active = not target_user.is_active
+        target_user.save()
+        
+        status = "activated" if target_user.is_active else "suspended"
+        return JsonResponse({
+            'success': True,
+            'message': f'User {target_user.username} has been {status} successfully.',
+            'new_status': target_user.is_active
+        })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+@user_passes_test(is_uwa_staff, login_url='accounts:profile')
+def user_detail(request, user_id):
+    """Detailed user view for UWA staff"""
+    from django.db import models
+    
+    target_user = get_object_or_404(User, id=user_id)
+    profile, created = Profile.objects.get_or_create(user=target_user)
+    
+    # Get user statistics
+    from booking.models import Booking
+    from tours.models import Park
+    from datetime import datetime, timedelta
+    from decimal import Decimal
+    
+    total_bookings = target_user.bookings.count()
+    confirmed_bookings = target_user.bookings.filter(booking_status='confirmed').count()
+    completed_bookings = target_user.bookings.filter(booking_status='completed').count()
+    
+    # Calculate total spent
+    total_spent = target_user.bookings.filter(
+        booking_status__in=['confirmed', 'completed']
+    ).aggregate(total=models.Sum('total_cost'))['total'] or Decimal('0')
+    
+    # Get recent bookings
+    recent_bookings = target_user.bookings.select_related(
+        'availability__tour__park', 'availability__guide__user'
+    ).order_by('-booking_date')[:10]
+    
+    context = {
+        'target_user': target_user,
+        'profile': profile,
+        'total_bookings': total_bookings,
+        'confirmed_bookings': confirmed_bookings,
+        'completed_bookings': completed_bookings,
+        'total_spent': total_spent,
+        'recent_bookings': recent_bookings,
+    }
+    return render(request, 'accounts/user_detail.html', context)

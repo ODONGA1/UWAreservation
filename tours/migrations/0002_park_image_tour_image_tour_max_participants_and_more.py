@@ -32,8 +32,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='tour',
-            name='duration',
-            field=models.DurationField(help_text='Duration of the tour (e.g., 2 days, 4 hours)'),
+            name='duration_hours',
+            field=models.IntegerField(help_text='Duration of the tour in hours'),
         ),
         migrations.AlterField(
             model_name='tour',

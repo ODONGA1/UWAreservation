@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit User: {{ target_user.username }} - UWA Wildlife Tours{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-4 mb-4">
+                <a href="{% url 'accounts:manage_users' %}" class="text-safari-600 hover:text-safari-700">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Edit User</h1>
+                    <p class="text-gray-600">Manage {{ target_user.get_full_name|default:target_user.username }}'s account</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- User Info Card -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-gradient-to-br from-safari-600 to-wildlife-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                            {{ target_user.first_name|first|default:target_user.username|first|upper }}
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">{{ target_user.get_full_name|default:target_user.username }}</h3>
+                        <p class="text-gray-500">@{{ target_user.username }}</p>
+                        <p class="text-sm text-gray-500">{{ target_user.email }}</p>
+                        
+                        <!-- Status Badge -->
+                        <div class="mt-4">
+                            {% if target_user.is_active %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>Active Account
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    <i data-lucide="x-circle" class="w-4 h-4 mr-1"></i>Suspended Account
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- User Roles -->
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">Current Roles</h4>
+                        <div class="flex flex-wrap gap-2">
+                            {% for role in target_user.profile.roles.all %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    {% if role.name == 'staff' %}bg-blue-100 text-blue-800
+                                    {% elif role.name == 'guide' %}bg-green-100 text-green-800
+                                    {% elif role.name == 'operator' %}bg-purple-100 text-purple-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ role.get_name_display }}
+                                </span>
+                            {% empty %}
+                                <span class="text-sm text-gray-400">No roles assigned</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Account Info -->
+                    <div class="mt-6 space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Joined:</span>
+                            <span class="text-gray-900">{{ target_user.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Last Login:</span>
+                            <span class="text-gray-900">
+                                {% if target_user.last_login %}
+                                    {{ target_user.last_login|date:"M d, Y" }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Forms -->
+            <div class="lg:col-span-2 space-y-6">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ user_form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Username
+                                    </label>
+                                    {{ user_form.username }}
+                                    {% if user_form.username.errors %}
+                                        <div class="text-red-600 text-sm mt-1">{{ user_form.username.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ user_form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Email
+                                    </label>
+                                    {{ user_form.email }}
+                                    {% if user_form.email.errors %}
+                                        <div class="text-red-600 text-sm mt-1">{{ user_form.email.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ user_form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        First Name
+                                    </label>
+                                    {{ user_form.first_name }}
+                                    {% if user_form.first_name.errors %}
+                                        <div class="text-red-600 text-sm mt-1">{{ user_form.first_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <label for="{{ user_form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Last Name
+                                    </label>
+                                    {{ user_form.last_name }}
+                                    {% if user_form.last_name.errors %}
+                                        <div class="text-red-600 text-sm mt-1">{{ user_form.last_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                {{ user_form.is_active }}
+                                <label for="{{ user_form.is_active.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                                    Account is active (uncheck to suspend account)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Roles and Profile -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Roles and Profile</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <!-- Roles -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">User Roles</label>
+                                <div class="space-y-2">
+                                    {% for role in profile_form.roles %}
+                                        <div class="flex items-center">
+                                            {{ role.tag }}
+                                            <label for="{{ role.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                                                {{ role.choice_label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">{{ profile_form.roles.help_text }}</div>
+                            </div>
+                            
+                            <!-- Phone Number and Bio -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ profile_form.phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Phone Number
+                                    </label>
+                                    {{ profile_form.phone_number }}
+                                    {% if profile_form.phone_number.errors %}
+                                        <div class="text-red-600 text-sm mt-1">{{ profile_form.phone_number.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="{{ profile_form.bio.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Bio
+                                </label>
+                                {{ profile_form.bio }}
+                                {% if profile_form.bio.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ profile_form.bio.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role-specific Fields (shown/hidden with JavaScript) -->
+                    <div id="guide-fields" class="bg-white rounded-lg shadow" style="display: none;">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Tour Guide Information</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ profile_form.guide_experience_years.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Experience Years
+                                    </label>
+                                    {{ profile_form.guide_experience_years }}
+                                </div>
+                                <div>
+                                    <label for="{{ profile_form.guide_languages.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Languages
+                                    </label>
+                                    {{ profile_form.guide_languages }}
+                                </div>
+                            </div>
+                            <div>
+                                <label for="{{ profile_form.guide_specializations.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Specializations
+                                </label>
+                                {{ profile_form.guide_specializations }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="operator-fields" class="bg-white rounded-lg shadow" style="display: none;">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">Tour Operator Information</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ profile_form.operator_company_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Company Name
+                                    </label>
+                                    {{ profile_form.operator_company_name }}
+                                </div>
+                                <div>
+                                    <label for="{{ profile_form.operator_license_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        License Number
+                                    </label>
+                                    {{ profile_form.operator_license_number }}
+                                </div>
+                            </div>
+                            <div>
+                                <label for="{{ profile_form.operator_website.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Website
+                                </label>
+                                {{ profile_form.operator_website }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="staff-fields" class="bg-white rounded-lg shadow" style="display: none;">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">UWA Staff Information</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="{{ profile_form.staff_employee_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Employee ID
+                                    </label>
+                                    {{ profile_form.staff_employee_id }}
+                                </div>
+                                <div>
+                                    <label for="{{ profile_form.staff_department.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Department
+                                    </label>
+                                    {{ profile_form.staff_department }}
+                                </div>
+                            </div>
+                            <div>
+                                <label for="{{ profile_form.staff_position.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Position
+                                </label>
+                                {{ profile_form.staff_position }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between">
+                        <a href="{% url 'accounts:manage_users' %}" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                            <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide role-specific fields based on selected roles
+function toggleRoleFields() {
+    const roleCheckboxes = document.querySelectorAll('input[name="roles"]');
+    const guideFields = document.getElementById('guide-fields');
+    const operatorFields = document.getElementById('operator-fields');
+    const staffFields = document.getElementById('staff-fields');
+    
+    let showGuide = false;
+    let showOperator = false;
+    let showStaff = false;
+    
+    roleCheckboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            const roleValue = checkbox.value;
+            // You'll need to map role IDs to names, for now using labels
+            const roleLabel = checkbox.nextElementSibling.textContent.toLowerCase();
+            
+            if (roleLabel.includes('guide')) showGuide = true;
+            if (roleLabel.includes('operator')) showOperator = true;
+            if (roleLabel.includes('staff')) showStaff = true;
+        }
+    });
+    
+    guideFields.style.display = showGuide ? 'block' : 'none';
+    operatorFields.style.display = showOperator ? 'block' : 'none';
+    staffFields.style.display = showStaff ? 'block' : 'none';
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleRoleFields();
+    
+    // Add event listeners to role checkboxes
+    const roleCheckboxes = document.querySelectorAll('input[name="roles"]');
+    roleCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', toggleRoleFields);
+    });
+});
+</script>
+{% endblock %}

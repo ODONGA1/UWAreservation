@@ -1,0 +1,413 @@
+{% load static %}
+
+<div class="ratings-component bg-white rounded-lg shadow-md overflow-hidden">
+    <!-- Rating Summary -->
+    <div class="p-4 border-b flex items-center justify-between">
+        <div class="flex items-center">
+            <div class="mr-3">
+                <div class="bg-safari-700 text-white w-14 h-14 rounded-lg flex items-center justify-center text-2xl font-bold">
+                    {{ rating_stats.average|floatformat:1 }}
+                </div>
+            </div>
+            <div>
+                <div class="text-gray-800 font-semibold">
+                    {% if rating_stats.count == 0 %}
+                        No ratings yet
+                    {% elif rating_stats.count == 1 %}
+                        1 rating
+                    {% else %}
+                        {{ rating_stats.count }} ratings
+                    {% endif %}
+                </div>
+                <div class="flex items-center">
+                    {% include "ratings/components/star_display.html" with rating=rating_stats.average %}
+                    
+                    {% if rating_stats.verified_count > 0 %}
+                        <span class="ml-2 text-xs bg-green-100 text-green-800 py-1 px-2 rounded-full">
+                            {{ rating_stats.verified_count }} verified
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if user.is_authenticated %}
+            <div>
+                {% if has_user_rated %}
+                    <a href="{% url 'ratings:edit_rating' user_rating.id %}" class="bg-safari-100 text-safari-700 px-3 py-1 rounded hover:bg-safari-200 inline-flex items-center">
+                        <i data-lucide="pencil" class="w-4 h-4 mr-1"></i>
+                        Edit your review
+                    </a>
+                {% else %}
+                    <a href="{% url 'ratings:add_rating' app_name model_name object_id %}" class="bg-safari-600 text-white px-3 py-1 rounded hover:bg-safari-700 inline-flex items-center">
+                        <i data-lucide="star" class="w-4 h-4 mr-1"></i>
+                        Write a review
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Rating Distribution -->
+    <div class="p-4 border-b">
+        <h3 class="text-sm font-medium text-gray-700 mb-2">Rating Distribution</h3>
+        <div class="space-y-2">
+            {% for i in "54321" %}
+            <div class="flex items-center">
+                <div class="w-4 text-xs text-gray-600 mr-2">{{ i }}</div>
+                <div class="flex items-center">
+                    <i data-lucide="star" class="w-3 h-3 text-yellow-400"></i>
+                </div>
+                <div class="ml-2 flex-1">
+                    <div class="relative h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                        {% with bar_width=rating_stats.distribution|get_item:i|percentage:rating_stats.count %}
+                        <div class="absolute h-full bg-safari-600" style="width: {{ bar_width }}%"></div>
+                        {% endwith %}
+                    </div>
+                </div>
+                <div class="w-8 text-xs text-gray-600 ml-2 text-right">
+                    {{ rating_stats.distribution|get_item:i }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Rating Filters -->
+    <div class="p-4 border-b bg-gray-50">
+        <div class="flex flex-wrap gap-2">
+            <button class="rating-filter px-3 py-1 rounded-full text-sm {% if not filter %}bg-safari-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+                    data-filter="">All reviews</button>
+            <button class="rating-filter px-3 py-1 rounded-full text-sm {% if filter == 'verified' %}bg-safari-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+                    data-filter="verified">Verified bookings</button>
+            <button class="rating-filter px-3 py-1 rounded-full text-sm {% if filter == 'photos' %}bg-safari-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+                    data-filter="photos">With photos</button>
+            
+            {% for i in "54321" %}
+            <button class="rating-filter px-3 py-1 rounded-full text-sm {% if filter == i %}bg-safari-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}"
+                    data-filter="{{ i }}">{{ i }} stars</button>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Ratings List -->
+    <div class="ratings-list divide-y" id="ratings-container">
+        {% include "ratings/components/rating_list.html" %}
+    </div>
+    
+    <!-- Pagination -->
+    <div class="p-4 flex justify-between items-center bg-gray-50" id="ratings-pagination">
+        <button class="pagination-button px-3 py-1 text-sm {% if not pagination.has_previous %}opacity-50 cursor-not-allowed{% endif %}"
+                id="prev-button" {% if not pagination.has_previous %}disabled{% endif %}
+                data-page="{{ pagination.current_page|add:"-1" }}">
+            <i data-lucide="chevron-left" class="w-4 h-4 inline"></i>
+            Previous
+        </button>
+        
+        <span class="text-sm text-gray-600">
+            Page {{ pagination.current_page }} of {{ pagination.total_pages }}
+        </span>
+        
+        <button class="pagination-button px-3 py-1 text-sm {% if not pagination.has_next %}opacity-50 cursor-not-allowed{% endif %}"
+                id="next-button" {% if not pagination.has_next %}disabled{% endif %}
+                data-page="{{ pagination.current_page|add:"1" }}">
+            Next
+            <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
+        </button>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup filter buttons
+        const filterButtons = document.querySelectorAll('.rating-filter');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const filter = this.dataset.filter;
+                loadRatings(1, filter);
+            });
+        });
+        
+        // Setup pagination
+        const paginationButtons = document.querySelectorAll('.pagination-button');
+        paginationButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.disabled) return;
+                
+                const page = this.dataset.page;
+                const activeFilter = document.querySelector('.rating-filter.bg-safari-600').dataset.filter;
+                loadRatings(page, activeFilter);
+            });
+        });
+        
+        // Setup helpful buttons
+        setupHelpfulButtons();
+    });
+    
+    function loadRatings(page, filter) {
+        const url = `{% url 'ratings:get_ratings' app_name model_name object_id %}?page=${page}&filter=${filter}`;
+        
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update ratings list
+                const ratingsContainer = document.getElementById('ratings-container');
+                
+                // Build HTML for ratings
+                let html = '';
+                if (data.ratings.length === 0) {
+                    html = '<div class="p-6 text-center text-gray-500">No reviews match your criteria</div>';
+                } else {
+                    data.ratings.forEach(rating => {
+                        html += buildRatingHTML(rating);
+                    });
+                }
+                
+                ratingsContainer.innerHTML = html;
+                
+                // Update pagination
+                updatePagination(data.pagination);
+                
+                // Update filter buttons
+                updateFilterButtons(filter);
+                
+                // Reinitialize helpful buttons
+                setupHelpfulButtons();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading ratings:', error);
+        });
+    }
+    
+    function buildRatingHTML(rating) {
+        // Build star HTML
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating.overall_rating) {
+                starsHtml += '<i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>';
+            } else {
+                starsHtml += '<i data-lucide="star" class="w-4 h-4 text-gray-300"></i>';
+            }
+        }
+        
+        // Build photos HTML
+        let photosHtml = '';
+        if (rating.photos && rating.photos.length > 0) {
+            photosHtml = '<div class="mt-3 grid grid-cols-3 gap-2">';
+            rating.photos.forEach(photo => {
+                photosHtml += `
+                    <a href="${photo.url}" target="_blank" class="block">
+                        <img src="${photo.url}" alt="${photo.caption}" class="w-full h-20 object-cover rounded">
+                    </a>
+                `;
+            });
+            photosHtml += '</div>';
+        }
+        
+        // Build replies HTML
+        let repliesHtml = '';
+        if (rating.replies && rating.replies.length > 0) {
+            repliesHtml = '<div class="mt-4 pl-4 border-l-4 border-gray-200">';
+            rating.replies.forEach(reply => {
+                repliesHtml += `
+                    <div class="mb-3">
+                        <div class="flex items-center">
+                            <span class="font-medium text-gray-900">${reply.user_full_name}</span>
+                            ${reply.is_staff ? '<span class="ml-2 text-xs bg-safari-100 text-safari-800 px-2 py-0.5 rounded-full">Staff</span>' : ''}
+                        </div>
+                        <div class="text-sm text-gray-600">${reply.created_at}</div>
+                        <div class="mt-1">${reply.comment}</div>
+                    </div>
+                `;
+            });
+            repliesHtml += '</div>';
+        }
+        
+        // Build specific ratings HTML
+        let specificRatingsHtml = '';
+        const ratingLabels = {
+            value_rating: 'Value',
+            service_rating: 'Service',
+            cleanliness_rating: 'Cleanliness',
+            knowledge_rating: 'Knowledge'
+        };
+        
+        let hasSpecificRatings = false;
+        for (const key in ratingLabels) {
+            if (rating[key]) {
+                hasSpecificRatings = true;
+                break;
+            }
+        }
+        
+        if (hasSpecificRatings) {
+            specificRatingsHtml = '<div class="mt-3 grid grid-cols-2 gap-2 text-sm">';
+            for (const key in ratingLabels) {
+                if (rating[key]) {
+                    specificRatingsHtml += `
+                        <div>
+                            <div class="text-gray-600">${ratingLabels[key]}</div>
+                            <div class="flex">
+                                ${buildStars(rating[key])}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            specificRatingsHtml += '</div>';
+        }
+        
+        return `
+            <div class="p-4">
+                <div class="flex items-start">
+                    <div class="flex-1">
+                        <div class="flex items-center">
+                            <span class="font-semibold text-gray-900">${rating.user_full_name}</span>
+                            ${rating.is_verified ? 
+                              '<span class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Verified Booking</span>' : ''}
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">${rating.created_at}</div>
+                        
+                        <div class="flex mb-2">
+                            ${starsHtml}
+                        </div>
+                        
+                        ${specificRatingsHtml}
+                        
+                        <div class="text-gray-700">
+                            ${rating.comment}
+                        </div>
+                        
+                        ${photosHtml}
+                        
+                        <div class="mt-3 flex items-center text-sm">
+                            <button class="helpful-button text-gray-600 hover:text-safari-700 flex items-center" data-rating-id="${rating.id}">
+                                <i data-lucide="thumbs-up" class="w-4 h-4 mr-1"></i>
+                                Helpful (${rating.helpful_count})
+                            </button>
+                            
+                            {% if user.is_authenticated %}
+                                <button class="reply-button ml-4 text-gray-600 hover:text-safari-700 flex items-center" 
+                                        data-rating-id="${rating.id}"
+                                        onclick="toggleReplyForm(${rating.id})">
+                                    <i data-lucide="message-square" class="w-4 h-4 mr-1"></i>
+                                    Reply
+                                </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div id="reply-form-${rating.id}" class="mt-3 hidden">
+                            <form method="post" action="{% url 'ratings:add_rating_reply' 0 %}".replace('0', rating.id)>
+                                {% csrf_token %}
+                                <textarea name="comment" rows="2" class="w-full border border-gray-300 rounded px-3 py-2" 
+                                          placeholder="Write your reply..."></textarea>
+                                <div class="flex justify-end mt-2">
+                                    <button type="button" class="mr-2 text-sm" onclick="toggleReplyForm(${rating.id})">Cancel</button>
+                                    <button type="submit" class="bg-safari-600 text-white px-3 py-1 rounded text-sm">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        ${repliesHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function buildStars(rating) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) {
+                html += '<i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>';
+            } else {
+                html += '<i data-lucide="star" class="w-3 h-3 text-gray-300"></i>';
+            }
+        }
+        return html;
+    }
+    
+    function updatePagination(pagination) {
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        
+        // Update previous button
+        prevButton.disabled = !pagination.has_previous;
+        if (pagination.has_previous) {
+            prevButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            prevButton.dataset.page = pagination.current_page - 1;
+        } else {
+            prevButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        
+        // Update next button
+        nextButton.disabled = !pagination.has_next;
+        if (pagination.has_next) {
+            nextButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            nextButton.dataset.page = pagination.current_page + 1;
+        } else {
+            nextButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        
+        // Update page numbers
+        const paginationContainer = document.getElementById('ratings-pagination');
+        const pageText = paginationContainer.querySelector('span');
+        pageText.textContent = `Page ${pagination.current_page} of ${pagination.total_pages}`;
+    }
+    
+    function updateFilterButtons(activeFilter) {
+        const filterButtons = document.querySelectorAll('.rating-filter');
+        filterButtons.forEach(button => {
+            if (button.dataset.filter === activeFilter) {
+                button.classList.add('bg-safari-600', 'text-white');
+                button.classList.remove('bg-gray-200', 'text-gray-700');
+            } else {
+                button.classList.remove('bg-safari-600', 'text-white');
+                button.classList.add('bg-gray-200', 'text-gray-700');
+            }
+        });
+    }
+    
+    function setupHelpfulButtons() {
+        const helpfulButtons = document.querySelectorAll('.helpful-button');
+        helpfulButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const ratingId = this.dataset.ratingId;
+                
+                {% if user.is_authenticated %}
+                    fetch(`{% url 'ratings:mark_rating_helpful' 0 %}`.replace('0', ratingId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Update the button text with new count
+                            const icon = this.querySelector('i');
+                            this.innerHTML = '';
+                            this.appendChild(icon);
+                            this.appendChild(document.createTextNode(` Helpful (${data.helpful_count})`));
+                        }
+                    });
+                {% else %}
+                    window.location.href = '{% url "accounts:login" %}?next=' + window.location.pathname;
+                {% endif %}
+            });
+        });
+    }
+    
+    function toggleReplyForm(ratingId) {
+        const form = document.getElementById(`reply-form-${ratingId}`);
+        if (form.classList.contains('hidden')) {
+            form.classList.remove('hidden');
+        } else {
+            form.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

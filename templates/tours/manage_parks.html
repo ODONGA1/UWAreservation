@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Parks - UWA Wildlife Tours{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Park Management</h1>
+                    <p class="text-gray-600">Manage national parks and conservation areas</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{% url 'tours:add_park' %}" 
+                       class="px-6 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                        <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>Add New Park
+                    </a>
+                    <a href="{% url 'tours:manage_tours' %}" 
+                       class="px-6 py-2 bg-wildlife-600 text-white rounded-lg hover:bg-wildlife-700 transition-colors">
+                        <i data-lucide="map" class="w-4 h-4 inline mr-2"></i>Manage Tours
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Stats -->
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    <form method="get" class="flex-1 max-w-md">
+                        <div class="relative">
+                            <input type="text" 
+                                   name="search" 
+                                   value="{{ search_query }}"
+                                   placeholder="Search parks by name, location, or description..."
+                                   class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                            <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="text-sm text-gray-500">
+                        Total Parks: {{ total_parks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parks Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for park in page_obj %}
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                    <!-- Park Image -->
+                    <div class="h-48 bg-gradient-to-br from-safari-500 to-wildlife-600 relative">
+                        {% if park.image %}
+                            <img src="{{ park.image.url }}" 
+                                 alt="{{ park.name }}" 
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-white">
+                                <i data-lucide="mountain" class="w-16 h-16"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Park Stats Overlay -->
+                        <div class="absolute top-4 left-4">
+                            <div class="bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+                                {{ park.tour_count }} tour{{ park.tour_count|pluralize }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Park Info -->
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ park.name }}</h3>
+                            <div class="flex items-center text-gray-500 mb-2">
+                                <i data-lucide="map-pin" class="w-4 h-4 mr-1"></i>
+                                <span class="text-sm">{{ park.location }}</span>
+                            </div>
+                            <p class="text-gray-600 text-sm line-clamp-3">
+                                {{ park.description|truncatewords:20 }}
+                            </p>
+                        </div>
+                        
+                        <!-- Park Statistics -->
+                        <div class="grid grid-cols-2 gap-4 mb-4 text-center">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <div class="text-lg font-bold text-safari-600">{{ park.tour_count }}</div>
+                                <div class="text-xs text-gray-500">Tours</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <div class="text-lg font-bold text-wildlife-600">{{ park.total_bookings }}</div>
+                                <div class="text-xs text-gray-500">Bookings</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-2">
+                            <a href="{% url 'tours:park_detail' park.id %}" 
+                               class="flex-1 text-center px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-sm">
+                                <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>View
+                            </a>
+                            <a href="{% url 'tours:edit_park' park.id %}" 
+                               class="flex-1 text-center px-3 py-2 bg-safari-100 text-safari-700 rounded hover:bg-safari-200 transition-colors text-sm">
+                                <i data-lucide="edit" class="w-4 h-4 inline mr-1"></i>Edit
+                            </a>
+                            <button onclick="deletePark({{ park.id }}, '{{ park.name }}')"
+                                    class="flex-1 px-3 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors text-sm">
+                                <i data-lucide="trash-2" class="w-4 h-4 inline mr-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-full">
+                    <div class="text-center py-12">
+                        <i data-lucide="mountain" class="w-16 h-16 mx-auto mb-4 text-gray-300"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No parks found</h3>
+                        <p class="text-gray-500 mb-4">
+                            {% if search_query %}
+                                No parks match your search criteria.
+                            {% else %}
+                                Get started by adding your first park.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'tours:add_park' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>Add First Park
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="mt-8 flex justify-center">
+                <nav class="flex space-x-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}"
+                           class="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 rounded-l-md">
+                            Previous
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-3 py-2 text-sm bg-safari-600 text-white border border-safari-600">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}&search={{ search_query }}"
+                               class="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-500 hover:bg-gray-50">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}"
+                           class="px-3 py-2 text-sm bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 rounded-r-md">
+                            Next
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function deletePark(parkId, parkName) {
+    if (!confirm(`Are you sure you want to delete "${parkName}"? This action cannot be undone.`)) {
+        return;
+    }
+    
+    fetch(`{% url 'tours:delete_park' 0 %}`.replace('0', parkId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+</script>
+
+{% csrf_token %}
+{% endblock %}

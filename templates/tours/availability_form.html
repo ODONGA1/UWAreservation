@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - UWA Reservation{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <a href="{% url 'tours:manage_availability' %}" class="inline-flex items-center text-safari-600 hover:text-safari-700 mb-4">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Tour Dates
+        </a>
+        <h1 class="text-3xl font-bold text-gray-800">{{ title }}</h1>
+        <p class="text-gray-600 mt-2">Edit availability details for {{ availability.tour.name }}</p>
+    </div>
+    
+    <!-- Edit Form -->
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="{{ form.tour.id_for_label }}">
+                        Tour
+                    </label>
+                    {{ form.tour }}
+                    {% if form.tour.help_text %}
+                    <p class="text-gray-500 text-xs mt-1">{{ form.tour.help_text }}</p>
+                    {% endif %}
+                    {% if form.tour.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.tour.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="{{ form.date.id_for_label }}">
+                        Date
+                    </label>
+                    {{ form.date }}
+                    {% if form.date.help_text %}
+                    <p class="text-gray-500 text-xs mt-1">{{ form.date.help_text }}</p>
+                    {% endif %}
+                    {% if form.date.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="{{ form.total_slots.id_for_label }}">
+                        Total Slots
+                    </label>
+                    {{ form.total_slots }}
+                    {% if form.total_slots.help_text %}
+                    <p class="text-gray-500 text-xs mt-1">{{ form.total_slots.help_text }}</p>
+                    {% endif %}
+                    {% if form.total_slots.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.total_slots.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2" for="{{ form.reserved_slots.id_for_label }}">
+                        Reserved Slots
+                    </label>
+                    {{ form.reserved_slots }}
+                    {% if form.reserved_slots.help_text %}
+                    <p class="text-gray-500 text-xs mt-1">{{ form.reserved_slots.help_text }}</p>
+                    {% endif %}
+                    {% if form.reserved_slots.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.reserved_slots.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="{{ form.guide.id_for_label }}">
+                    Guide
+                </label>
+                {{ form.guide }}
+                {% if form.guide.help_text %}
+                <p class="text-gray-500 text-xs mt-1">{{ form.guide.help_text }}</p>
+                {% endif %}
+                {% if form.guide.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.guide.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2" for="{{ form.notes.id_for_label }}">
+                    Notes
+                </label>
+                {{ form.notes }}
+                {% if form.notes.help_text %}
+                <p class="text-gray-500 text-xs mt-1">{{ form.notes.help_text }}</p>
+                {% endif %}
+                {% if form.notes.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.notes.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Current Bookings Info -->
+            {% with bookings_count=availability.bookings.count %}
+            {% if bookings_count > 0 %}
+            <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded flex items-start">
+                <svg class="h-6 w-6 text-blue-600 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <p class="font-medium">This tour date has {{ bookings_count }} existing booking{% if bookings_count != 1 %}s{% endif %}</p>
+                    <p class="text-sm">Reducing the total slots may affect existing bookings. Please ensure there are enough slots for all current bookings.</p>
+                </div>
+            </div>
+            {% endif %}
+            {% endwith %}
+            
+            <div class="flex justify-between pt-4 border-t border-gray-100">
+                <a href="{% url 'tours:manage_availability' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-safari-600 hover:bg-safari-700 text-white font-medium py-2 px-4 rounded-lg">
+                    Update Tour Date
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Any additional JavaScript for this page
+        const tourSelect = document.getElementById('tour-select');
+        const totalSlotsInput = document.getElementById('id_total_slots');
+        
+        // Update max slots based on selected tour's max participants
+        if (tourSelect) {
+            tourSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption.dataset.maxParticipants) {
+                    totalSlotsInput.max = selectedOption.dataset.maxParticipants;
+                    totalSlotsInput.setAttribute('placeholder', `Max: ${selectedOption.dataset.maxParticipants}`);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

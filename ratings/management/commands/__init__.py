@@ -1,0 +1,3 @@
+"""
+Initialize the commands package
+"""

@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}User Details: {{ target_user.username }} - UWA Wildlife Tours{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-4 mb-4">
+                <a href="{% url 'accounts:manage_users' %}" class="text-safari-600 hover:text-safari-700">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">User Details</h1>
+                    <p class="text-gray-600">Detailed information for {{ target_user.get_full_name|default:target_user.username }}</p>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex space-x-4">
+                <a href="{% url 'accounts:edit_user' target_user.id %}" 
+                   class="px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                    <i data-lucide="edit" class="w-4 h-4 inline mr-2"></i>Edit User
+                </a>
+                {% if target_user != request.user %}
+                    <button onclick="toggleUserStatus({{ target_user.id }}, '{{ target_user.username }}', {{ target_user.is_active|yesno:'true,false' }})"
+                            class="px-4 py-2 {% if target_user.is_active %}bg-red-600 hover:bg-red-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white rounded-lg transition-colors">
+                        {% if target_user.is_active %}
+                            <i data-lucide="user-x" class="w-4 h-4 inline mr-2"></i>Suspend Account
+                        {% else %}
+                            <i data-lucide="user-check" class="w-4 h-4 inline mr-2"></i>Activate Account
+                        {% endif %}
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- User Profile Card -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Basic Info -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-gradient-to-br from-safari-600 to-wildlife-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                            {{ target_user.first_name|first|default:target_user.username|first|upper }}
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">{{ target_user.get_full_name|default:target_user.username }}</h3>
+                        <p class="text-gray-500">@{{ target_user.username }}</p>
+                        <p class="text-sm text-gray-500">{{ target_user.email }}</p>
+                        
+                        <!-- Status Badge -->
+                        <div class="mt-4">
+                            {% if target_user.is_active %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>Active Account
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    <i data-lucide="x-circle" class="w-4 h-4 mr-1"></i>Suspended Account
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Information -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">Account Information</h4>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Joined:</span>
+                            <span class="text-gray-900">{{ target_user.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Last Login:</span>
+                            <span class="text-gray-900">
+                                {% if target_user.last_login %}
+                                    {{ target_user.last_login|date:"M d, Y" }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Phone:</span>
+                            <span class="text-gray-900">{{ profile.phone_number|default:"Not provided" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Roles -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="text-lg font-medium text-gray-900 mb-4">User Roles</h4>
+                    <div class="space-y-2">
+                        {% for role in target_user.profile.roles.all %}
+                            <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="w-3 h-3 rounded-full mr-3 
+                                    {% if role.name == 'staff' %}bg-blue-500
+                                    {% elif role.name == 'guide' %}bg-green-500
+                                    {% elif role.name == 'operator' %}bg-purple-500
+                                    {% else %}bg-gray-500{% endif %}">
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ role.get_name_display }}</div>
+                                    <div class="text-sm text-gray-500">{{ role.description }}</div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-4 text-gray-500">
+                                <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+                                <p>No roles assigned</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="calendar" class="w-8 h-8 text-safari-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">Total Bookings</div>
+                                <div class="text-2xl font-bold text-gray-900">{{ total_bookings }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="check-circle" class="w-8 h-8 text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">Confirmed</div>
+                                <div class="text-2xl font-bold text-gray-900">{{ confirmed_bookings }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="star" class="w-8 h-8 text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">Completed</div>
+                                <div class="text-2xl font-bold text-gray-900">{{ completed_bookings }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="dollar-sign" class="w-8 h-8 text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-500">Total Spent</div>
+                                <div class="text-2xl font-bold text-gray-900">${{ total_spent }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bio Section -->
+                {% if profile.bio %}
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">About</h4>
+                        <p class="text-gray-700">{{ profile.bio }}</p>
+                    </div>
+                {% endif %}
+
+                <!-- Role-specific Information -->
+                {% if profile.is_guide %}
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">Tour Guide Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% if profile.guide_experience_years %}
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Experience:</span>
+                                    <p class="text-gray-900">{{ profile.guide_experience_years }} years</p>
+                                </div>
+                            {% endif %}
+                            {% if profile.guide_languages %}
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Languages:</span>
+                                    <p class="text-gray-900">{{ profile.guide_languages }}</p>
+                                </div>
+                            {% endif %}
+                            {% if profile.guide_specializations %}
+                                <div class="md:col-span-2">
+                                    <span class="text-sm font-medium text-gray-500">Specializations:</span>
+                                    <p class="text-gray-900">{{ profile.guide_specializations }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if profile.is_operator %}
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">Tour Operator Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% if profile.operator_company_name %}
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Company:</span>
+                                    <p class="text-gray-900">{{ profile.operator_company_name }}</p>
+                                </div>
+                            {% endif %}
+                            {% if profile.operator_license_number %}
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">License:</span>
+                                    <p class="text-gray-900">{{ profile.operator_license_number }}</p>
+                                </div>
+                            {% endif %}
+                            {% if profile.operator_website %}
+                                <div class="md:col-span-2">
+                                    <span class="text-sm font-medium text-gray-500">Website:</span>
+                                    <p class="text-gray-900">
+                                        <a href="{{ profile.operator_website }}" target="_blank" class="text-safari-600 hover:text-safari-700">
+                                            {{ profile.operator_website }}
+                                        </a>
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if profile.is_staff %}
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h4 class="text-lg font-medium text-gray-900 mb-4">UWA Staff Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% if profile.staff_employee_id %}
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Employee ID:</span>
+                                    <p class="text-gray-900">{{ profile.staff_employee_id }}</p>
+                                </div>
+                            {% endif %}
+                            {% if profile.staff_department %}
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Department:</span>
+                                    <p class="text-gray-900">{{ profile.staff_department }}</p>
+                                </div>
+                            {% endif %}
+                            {% if profile.staff_position %}
+                                <div class="md:col-span-2">
+                                    <span class="text-sm font-medium text-gray-500">Position:</span>
+                                    <p class="text-gray-900">{{ profile.staff_position }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Recent Bookings -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h4 class="text-lg font-medium text-gray-900">Recent Bookings</h4>
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        {% for booking in recent_bookings %}
+                            <div class="p-6">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <h5 class="text-sm font-medium text-gray-900">{{ booking.availability.tour.name }}</h5>
+                                        <p class="text-sm text-gray-500">{{ booking.availability.tour.park.name }}</p>
+                                        <div class="mt-1 flex items-center space-x-4 text-xs text-gray-500">
+                                            <span>{{ booking.availability.date }}</span>
+                                            <span>{{ booking.num_of_people }} people</span>
+                                            <span>${{ booking.total_cost }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if booking.booking_status == 'confirmed' %}bg-green-100 text-green-800
+                                            {% elif booking.booking_status == 'completed' %}bg-blue-100 text-blue-800
+                                            {% elif booking.booking_status == 'pending' %}bg-yellow-100 text-yellow-800
+                                            {% else %}bg-red-100 text-red-800{% endif %}">
+                                            {{ booking.get_booking_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="p-6 text-center text-gray-500">
+                                <i data-lucide="calendar-x" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+                                <p>No bookings found</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserStatus(userId, username, isActive) {
+    const action = isActive ? 'suspend' : 'activate';
+    const message = `Are you sure you want to ${action} user "${username}"?`;
+    
+    if (!confirm(message)) return;
+    
+    fetch(`{% url 'accounts:toggle_user_status' 0 %}`.replace('0', userId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            alert(data.message);
+            // Reload page to update UI
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+</script>
+
+{% csrf_token %}
+{% endblock %}

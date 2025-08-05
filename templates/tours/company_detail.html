@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load rating_tags %}
+
+{% block title %}{{ company.name }} - Tour Company{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'tours:tour_list' %}" class="text-safari-600 hover:text-safari-700">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ company.name }}</h1>
+                        <p class="text-gray-600 flex items-center mt-1">
+                            <i data-lucide="briefcase" class="w-4 h-4 mr-1"></i>
+                            {% if company.is_uwa %}UWA Official Tour Operator{% else %}Tour Company{% endif %}
+                        </p>
+                        <!-- Rating summary -->
+                        <div class="mt-2">
+                            {% display_rating_summary company %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Company Description -->
+                {% if company.description %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">About {{ company.name }}</h2>
+                    <div class="prose prose-safari max-w-none">
+                        <p class="text-gray-700">{{ company.description|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Tours Section -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Available Tours</h2>
+                    
+                    {% if tours %}
+                        <div class="space-y-4">
+                            {% for tour in tours %}
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <h3 class="font-medium text-gray-900">{{ tour.name }}</h3>
+                                            <p class="text-gray-600 text-sm mt-1">{{ tour.description|truncatewords:20 }}</p>
+                                            <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                <span class="flex items-center">
+                                                    <i data-lucide="clock" class="w-3 h-3 mr-1"></i>
+                                                    {{ tour.duration_hours }} hours
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i data-lucide="users" class="w-3 h-3 mr-1"></i>
+                                                    Max {{ tour.max_participants }} people
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i data-lucide="dollar-sign" class="w-3 h-3 mr-1"></i>
+                                                    ${{ tour.price }}
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i>
+                                                    {{ tour.park.name }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'tours:tour_detail' tour.id %}" 
+                                               class="px-4 py-2 bg-safari-600 text-white text-sm rounded-lg hover:bg-safari-700 transition-colors">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 text-center py-4">No tours available from this company.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Ratings Section -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Ratings & Reviews</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            {% show_rating_breakdown company %}
+                            
+                            <div class="mt-6">
+                                {% show_specific_ratings company %}
+                            </div>
+                            
+                            <div class="mt-6">
+                                {% show_rating_button company user %}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Recent Reviews</h3>
+                            {% show_recent_ratings company 3 %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Company Info -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Company Information</h3>
+                    <div class="space-y-3">
+                        {% if company.website %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Website:</span>
+                            <a href="{{ company.website }}" target="_blank" class="text-safari-600 hover:underline">Visit Website</a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if company.license_number %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">License:</span>
+                            <span class="font-medium">{{ company.license_number }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if company.contact_email %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Email:</span>
+                            <a href="mailto:{{ company.contact_email }}" class="text-safari-600 hover:underline">{{ company.contact_email }}</a>
+                        </div>
+                        {% endif %}
+                        
+                        {% if company.contact_phone %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Phone:</span>
+                            <span class="font-medium">{{ company.contact_phone }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Total Tours:</span>
+                            <span class="font-medium">{{ tour_count }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Parks Covered:</span>
+                            <span class="font-medium">{{ park_count }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Operators (Only shown if user has permission) -->
+                {% if operators %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Tour Operators</h3>
+                    <div class="space-y-3">
+                        {% for operator in operators %}
+                            <div class="flex items-center">
+                                <div class="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center mr-3">
+                                    <span class="font-bold text-gray-600">{{ operator.username|first|upper }}</span>
+                                </div>
+                                <span class="font-medium">{{ operator.get_full_name|default:operator.username }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -172,6 +172,66 @@
                         {% endif %}
                     </div>
 
+                    <!-- Phone Number Field -->
+                    <div class="space-y-2">
+                        <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            Phone Number (Optional)
+                        </label>
+                        <div class="relative">
+                            <input type="tel" name="phone_number" id="id_phone_number" 
+                                   value="{{ form.phone_number.value|default:'' }}"
+                                   placeholder="+256 XXX XXX XXX"
+                                   class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent transition-colors duration-200">
+                            <div class="absolute left-4 top-1/2 transform -translate-y-1/2">
+                                <i data-lucide="phone" class="w-5 h-5 text-gray-400"></i>
+                            </div>
+                        </div>
+                        {% if form.phone_number.errors %}
+                            <div class="text-red-600 text-sm flex items-center space-x-1">
+                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                <span>{{ form.phone_number.errors.0 }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- User Roles Selection -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Select Your Role(s) *
+                        </label>
+                        <div class="space-y-3 p-4 bg-gray-50 rounded-lg">
+                            {% for role in form.roles %}
+                                <div class="flex items-start">
+                                    {{ role.tag }}
+                                    <div class="ml-3">
+                                        <label for="{{ role.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                            {{ role.choice_label }}
+                                        </label>
+                                        <!-- Add descriptions for each role -->
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            {% if 'Tourist' in role.choice_label %}
+                                                Book and enjoy wildlife tours and experiences
+                                            {% elif 'Tour Guide' in role.choice_label %}
+                                                Lead and guide tourists on wildlife tours
+                                            {% elif 'Tour Operator' in role.choice_label %}
+                                                Organize and manage tour operations
+                                            {% elif 'UWA Staff' in role.choice_label %}
+                                                Uganda Wildlife Authority employee
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.roles.errors %}
+                            <div class="text-red-600 text-sm flex items-center space-x-1">
+                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                <span>{{ form.roles.errors.0 }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="text-xs text-gray-500">{{ form.roles.help_text }}</div>
+                    </div>
+
                     <!-- Terms and Conditions -->
                     <div class="flex items-center">
                         <input type="checkbox" id="terms" name="terms" required

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load rating_tags %}
+
+{% block title %}{{ guide.user.get_full_name|default:guide.user.username }} - Guide Profile{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'tours:tour_list' %}" class="text-safari-600 hover:text-safari-700">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ guide.user.get_full_name|default:guide.user.username }}</h1>
+                        <p class="text-gray-600 flex items-center mt-1">
+                            <i data-lucide="award" class="w-4 h-4 mr-1"></i>
+                            {{ guide.specialization }}
+                        </p>
+                        <!-- Rating summary -->
+                        <div class="mt-2">
+                            {% display_rating_summary guide %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Guide Tours -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Upcoming Tours</h2>
+                    
+                    {% if availabilities %}
+                        <div class="space-y-4">
+                            {% for availability in availabilities %}
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <h3 class="font-medium text-gray-900">{{ availability.tour.name }}</h3>
+                                            <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                <span class="flex items-center">
+                                                    <i data-lucide="calendar" class="w-3 h-3 mr-1"></i>
+                                                    {{ availability.date|date:"F j, Y" }}
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i data-lucide="users" class="w-3 h-3 mr-1"></i>
+                                                    {{ availability.slots_available }} spots left
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i>
+                                                    {{ availability.tour.park.name }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'tours:tour_detail' availability.tour.id %}" 
+                                               class="px-4 py-2 bg-safari-600 text-white text-sm rounded-lg hover:bg-safari-700 transition-colors">
+                                                View Tour
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500 text-center py-4">No upcoming tours scheduled.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Ratings Section -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Ratings & Reviews</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            {% show_rating_breakdown guide %}
+                            
+                            <div class="mt-6">
+                                {% show_specific_ratings guide %}
+                            </div>
+                            
+                            <div class="mt-6">
+                                {% show_rating_button guide user %}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Recent Reviews</h3>
+                            {% show_recent_ratings guide 3 %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Guide Info -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Guide Information</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Specialization:</span>
+                            <span class="font-medium">{{ guide.specialization }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Total Tours:</span>
+                            <span class="font-medium">{{ total_tours }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Scheduled Tours:</span>
+                            <span class="font-medium">{{ total_availabilities }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tour Types -->
+                {% if tours %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Tour Types</h3>
+                    <div class="space-y-2">
+                        {% for tour in tours %}
+                            <a href="{% url 'tours:tour_detail' tour.id %}" 
+                               class="block p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                                <p class="font-medium text-gray-900">{{ tour.name }}</p>
+                                <p class="text-xs text-gray-500">
+                                    <i data-lucide="map-pin" class="w-3 h-3 inline"></i>
+                                    {{ tour.park.name }}
+                                </p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

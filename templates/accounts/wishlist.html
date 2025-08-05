@@ -153,7 +153,7 @@
 </section>
 
 <script>
-    console.log('Wishlist script v2.0 loaded with toast notifications - {{ "now"|date:"U" }}');
+    console.log('Wishlist script v2.0 loaded with toast notifications - {% now "U" %}');
     
     // Simple toast notification
     function showToast(message, type = 'info') {
@@ -346,6 +346,9 @@
     });
 </script>
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
     // Simple toast notification
     function showToast(message, type = 'info') {
         const toast = document.createElement('div');

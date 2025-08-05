@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ park.name }} - UWA Wildlife Tours{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'tours:manage_parks' %}" class="text-safari-600 hover:text-safari-700">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ park.name }}</h1>
+                        <p class="text-gray-600 flex items-center mt-1">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-1"></i>
+                            {{ park.location }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'tours:edit_park' park.id %}" 
+                       class="px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                        <i data-lucide="edit" class="w-4 h-4 inline mr-2"></i>
+                        Edit Park
+                    </a>
+                    <button onclick="confirmDeletePark({{ park.id }}, '{{ park.name|escapejs }}')"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4 inline mr-2"></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Park Image -->
+                {% if park.image %}
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <img src="{{ park.image.url }}" alt="{{ park.name }}" 
+                             class="w-full h-64 object-cover">
+                    </div>
+                {% endif %}
+
+                <!-- Description -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">About {{ park.name }}</h2>
+                    <div class="prose prose-gray max-w-none">
+                        <p class="text-gray-700 leading-relaxed">{{ park.description|linebreaks }}</p>
+                    </div>
+                </div>
+
+                <!-- Tours Section -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900">Available Tours</h2>
+                        <a href="{% url 'tours:add_tour' %}?park={{ park.id }}" 
+                           class="px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors text-sm">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                            Add Tour
+                        </a>
+                    </div>
+
+                    {% if park.tours.all %}
+                        <div class="space-y-4">
+                            {% for tour in park.tours.all %}
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <h3 class="font-medium text-gray-900">{{ tour.name }}</h3>
+                                            <p class="text-gray-600 text-sm mt-1">{{ tour.description|truncatewords:20 }}</p>
+                                            <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                                <span class="flex items-center">
+                                                    <i data-lucide="clock" class="w-3 h-3 mr-1"></i>
+                                                    {{ tour.duration_hours }} hours
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i data-lucide="users" class="w-3 h-3 mr-1"></i>
+                                                    Max {{ tour.max_participants }} people
+                                                </span>
+                                                <span class="flex items-center">
+                                                    <i data-lucide="dollar-sign" class="w-3 h-3 mr-1"></i>
+                                                    ${{ tour.price }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2 ml-4">
+                                            <a href="{% url 'tours:edit_tour' tour.id %}" 
+                                               class="p-2 text-safari-600 hover:bg-safari-50 rounded">
+                                                <i data-lucide="edit" class="w-4 h-4"></i>
+                                            </a>
+                                            <button onclick="confirmDeleteTour({{ tour.id }}, '{{ tour.name|escapejs }}')"
+                                                    class="p-2 text-red-600 hover:bg-red-50 rounded">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="map" class="w-8 h-8 text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Tours Available</h3>
+                            <p class="text-gray-600 mb-4">This park doesn't have any tours yet.</p>
+                            <a href="{% url 'tours:add_tour' %}?park={{ park.id }}" 
+                               class="inline-flex items-center px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                Create First Tour
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Park Statistics</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Total Tours:</span>
+                            <span class="font-medium">{{ park.tours.count }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Price Range:</span>
+                            <span class="font-medium">
+                                {% if park.tours.count > 0 %}
+                                    ${{ min_price|floatformat:0 }} - ${{ max_price|floatformat:0 }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Created:</span>
+                            <span class="font-medium">{{ park.created_at|date:"M d, Y"|default:"N/A" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <a href="{% url 'tours:add_tour' %}?park={{ park.id }}" 
+                           class="block w-full px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors text-center">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+                            Add New Tour
+                        </a>
+                        <a href="{% url 'tours:edit_park' park.id %}" 
+                           class="block w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-center">
+                            <i data-lucide="edit" class="w-4 h-4 inline mr-2"></i>
+                            Edit Park Details
+                        </a>
+                        <a href="{% url 'tours:manage_tours' %}" 
+                           class="block w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center">
+                            <i data-lucide="list" class="w-4 h-4 inline mr-2"></i>
+                            Manage All Tours
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Warning if no tours -->
+                {% if park.tours.count == 0 %}
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-2 text-amber-800">
+                            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                            <span class="font-medium">No Tours</span>
+                        </div>
+                        <p class="text-sm text-amber-700 mt-2">
+                            This park doesn't have any tours yet. Add tours to make this park available for bookings.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Park Modal -->
+<div id="deleteParkModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Delete Park</h3>
+        </div>
+        <p class="text-gray-600 mb-6">
+            Are you sure you want to delete <span id="parkNameToDelete" class="font-medium"></span>? 
+            This action cannot be undone.
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeParkDeleteModal()" 
+                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                Cancel
+            </button>
+            <button id="confirmParkDelete" 
+                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                Delete Park
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Tour Modal -->
+<div id="deleteTourModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Delete Tour</h3>
+        </div>
+        <p class="text-gray-600 mb-6">
+            Are you sure you want to delete <span id="tourNameToDelete" class="font-medium"></span>? 
+            This action cannot be undone.
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeTourDeleteModal()" 
+                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                Cancel
+            </button>
+            <button id="confirmTourDelete" 
+                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                Delete Tour
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let parkToDelete = null;
+let tourToDelete = null;
+
+function confirmDeletePark(parkId, parkName) {
+    parkToDelete = parkId;
+    document.getElementById('parkNameToDelete').textContent = parkName;
+    document.getElementById('deleteParkModal').classList.remove('hidden');
+    document.getElementById('deleteParkModal').classList.add('flex');
+}
+
+function closeParkDeleteModal() {
+    parkToDelete = null;
+    document.getElementById('deleteParkModal').classList.add('hidden');
+    document.getElementById('deleteParkModal').classList.remove('flex');
+}
+
+function confirmDeleteTour(tourId, tourName) {
+    tourToDelete = tourId;
+    document.getElementById('tourNameToDelete').textContent = tourName;
+    document.getElementById('deleteTourModal').classList.remove('hidden');
+    document.getElementById('deleteTourModal').classList.add('flex');
+}
+
+function closeTourDeleteModal() {
+    tourToDelete = null;
+    document.getElementById('deleteTourModal').classList.add('hidden');
+    document.getElementById('deleteTourModal').classList.remove('flex');
+}
+
+document.getElementById('confirmParkDelete').addEventListener('click', function() {
+    if (parkToDelete) {
+        fetch(`{% url 'tours:delete_park' 0 %}`.replace('0', parkToDelete), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '{% url "tours:manage_parks" %}';
+            } else {
+                alert('Error: ' + data.error);
+                closeParkDeleteModal();
+            }
+        })
+        .catch(error => {
+            alert('An error occurred while deleting the park.');
+            console.error('Error:', error);
+            closeParkDeleteModal();
+        });
+    }
+});
+
+document.getElementById('confirmTourDelete').addEventListener('click', function() {
+    if (tourToDelete) {
+        fetch(`{% url 'tours:delete_tour' 0 %}`.replace('0', tourToDelete), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+                closeTourDeleteModal();
+            }
+        })
+        .catch(error => {
+            alert('An error occurred while deleting the tour.');
+            console.error('Error:', error);
+            closeTourDeleteModal();
+        });
+    }
+});
+
+// Close modals when clicking outside
+document.getElementById('deleteParkModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeParkDeleteModal();
+    }
+});
+
+document.getElementById('deleteTourModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTourDeleteModal();
+    }
+});
+</script>
+{% endblock %}

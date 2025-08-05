@@ -1,0 +1,592 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ park.name }} - Wildlife Park in Uganda{% endblock %}
+{% block description %}{{ park.description|truncatewords:30 }} Explore this amazing wildlife park with expert guides and discover Uganda's incredible biodiversity.{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Park Image -->
+<section class="relative h-[70vh] overflow-hidden">
+    <div class="absolute inset-0">
+        {% if park.image %}
+            <img src="{{ park.image.url }}" 
+                 alt="{{ park.name }}" 
+                 class="w-full h-full object-cover">
+        {% else %}
+            <div class="w-full h-full bg-gradient-to-br from-green-600 via-safari-600 to-green-800"></div>
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20"></div>
+    </div>
+    
+    <div class="relative z-10 h-full flex items-end">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
+            <div class="max-w-4xl">
+                <!-- Breadcrumb -->
+                <nav class="mb-6">
+                    <ol class="flex items-center space-x-2 text-white/80">
+                        <li><a href="{% url 'tours:park_list' %}" class="hover:text-white transition-colors">Parks</a></li>
+                        <li><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+                        <li><span class="text-white">{{ park.name }}</span></li>
+                    </ol>
+                </nav>
+                
+                <!-- Park Info -->
+                <div class="flex items-center space-x-3 mb-4">
+                    <span class="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                        National Park
+                    </span>
+                    {% load rating_tags %}
+                    <div class="flex items-center space-x-1 text-yellow-400">
+                        {% display_star_rating park.average_rating size='sm' %}
+                        {% if park.ratings_count > 0 %}
+                            <span class="text-white ml-2">({{ park.average_rating|floatformat:1 }}/5 from {{ park.ratings_count }} reviews)</span>
+                        {% else %}
+                            <span class="text-white ml-2">(No reviews yet)</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <h1 class="font-display text-4xl md:text-6xl font-bold text-white mb-4">
+                    {{ park.name }}
+                </h1>
+                
+                <p class="text-xl text-white/90 mb-6 max-w-3xl">
+                    {% if park.description %}
+                        {{ park.description|truncatewords:25 }}
+                    {% else %}
+                        Discover the wonders of Uganda's pristine wilderness in this protected national park, home to incredible wildlife and breathtaking landscapes.
+                    {% endif %}
+                </p>
+                
+                <!-- Quick Stats -->
+                <div class="flex flex-wrap gap-6 text-white">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-green-400"></i>
+                        <span>{{ park.location }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="compass" class="w-5 h-5 text-green-400"></i>
+                        <a href="{% url 'tours:tour_list' %}?park={{ park.id }}" class="hover:text-green-300 transition-colors cursor-pointer">
+                            <span>{{ park.tours.count }} available tours</span>
+                        </a>
+                    </div>
+                    {% if min_price and max_price %}
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="dollar-sign" class="w-5 h-5 text-green-400"></i>
+                        <span class="text-2xl font-bold">
+                            {% if min_price == max_price %}
+                                ${{ min_price|floatformat:0 }}
+                            {% else %}
+                                ${{ min_price|floatformat:0 }} - ${{ max_price|floatformat:0 }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-gentle">
+        <i data-lucide="chevron-down" class="w-8 h-8 text-white"></i>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-12">
+            <!-- Description -->
+            <section class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <i data-lucide="info" class="w-8 h-8 text-green-600"></i>
+                    <span>About {{ park.name }}</span>
+                </h2>
+                <div class="prose prose-lg max-w-none text-gray-700">
+                    {% if park.description %}
+                        <p>{{ park.description }}</p>
+                    {% else %}
+                        <p>{{ park.name }} is one of Uganda's premier wildlife destinations, offering visitors the chance to experience incredible biodiversity and stunning natural landscapes.</p>
+                        
+                        <p>This protected area serves as a crucial habitat for wildlife conservation and provides an authentic African safari experience with expert guidance and sustainable tourism practices.</p>
+                        
+                        <p>Whether you're seeking wildlife photography opportunities, educational experiences, or simply the serenity of untouched nature, {{ park.name }} promises memories that will last a lifetime.</p>
+                    {% endif %}
+                </div>
+            </section>
+            
+            <!-- Park Highlights -->
+            <section class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <i data-lucide="star" class="w-8 h-8 text-green-600"></i>
+                    <span>Park Highlights</span>
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% if 'Bwindi' in park.name %}
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Mountain Gorilla trekking</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>UNESCO World Heritage Site</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Ancient impenetrable forest</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>23 primate species</span>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>350+ bird species</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Community cultural experiences</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Nature walks & hiking trails</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Conservation education</span>
+                            </div>
+                        </div>
+                    {% elif 'Queen Elizabeth' in park.name %}
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Tree-climbing lions</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Kazinga Channel boat cruises</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Elephant herds</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Hippo populations</span>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>600+ bird species</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Game drives & safaris</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Crater lakes exploration</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Chimpanzee tracking</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Diverse wildlife viewing</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Expert guided tours</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Nature photography</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Conservation education</span>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Bird watching opportunities</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Scenic landscapes</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Cultural experiences</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                                <span>Sustainable tourism</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+            
+            <!-- Wildlife Information -->
+            {% if park.key_wildlife %}
+                <section class="bg-white rounded-2xl p-8 shadow-lg">
+                    <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                        <i data-lucide="binoculars" class="w-8 h-8 text-green-600"></i>
+                        <span>Wildlife</span>
+                    </h2>
+                    <div class="prose prose-lg max-w-none text-gray-700">
+                        <p>{{ park.key_wildlife|linebreaks }}</p>
+                    </div>
+                </section>
+            {% endif %}
+            
+            <!-- Vegetation & Ecology -->
+            {% if park.vegetation_type %}
+                <section class="bg-white rounded-2xl p-8 shadow-lg">
+                    <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                        <i data-lucide="trees" class="w-8 h-8 text-green-600"></i>
+                        <span>Vegetation & Ecology</span>
+                    </h2>
+                    <div class="prose prose-lg max-w-none text-gray-700">
+                        <p>{{ park.vegetation_type|linebreaks }}</p>
+                    </div>
+                </section>
+            {% endif %}
+            
+            <!-- Key Features -->
+            {% if park.key_features %}
+                <section class="bg-white rounded-2xl p-8 shadow-lg">
+                    <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                        <i data-lucide="mountain" class="w-8 h-8 text-green-600"></i>
+                        <span>Key Features & Geography</span>
+                    </h2>
+                    <div class="prose prose-lg max-w-none text-gray-700">
+                        <p>{{ park.key_features|linebreaks }}</p>
+                    </div>
+                </section>
+            {% endif %}
+            
+            <!-- Available Tours -->
+            <section class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <i data-lucide="compass" class="w-8 h-8 text-green-600"></i>
+                    <span>Available Tours</span>
+                </h2>
+                
+                {% if park.tours.all %}
+                    <div class="space-y-6">
+                        {% for tour in park.tours.all %}
+                            <div class="border border-gray-200 rounded-xl p-6 hover:border-green-300 hover:shadow-md transition-all duration-200">
+                                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                    <div class="flex-1">
+                                        <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                            <a href="{% url 'tours:tour_detail' tour.id %}" class="hover:text-green-600 transition-colors">
+                                                {{ tour.name }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-gray-600 mb-3">{{ tour.description|truncatewords:20 }}</p>
+                                        <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                                            {% if tour.duration %}
+                                                <span class="flex items-center">
+                                                    <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                                                    {{ tour.duration }} hours
+                                                </span>
+                                            {% endif %}
+                                            {% if tour.max_participants %}
+                                                <span class="flex items-center">
+                                                    <i data-lucide="users" class="w-4 h-4 mr-1"></i>
+                                                    Max {{ tour.max_participants }} people
+                                                </span>
+                                            {% endif %}
+                                            <span class="flex items-center">
+                                                <i data-lucide="dollar-sign" class="w-4 h-4 mr-1"></i>
+                                                ${{ tour.price }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-3">
+                                        <a href="{% url 'tours:tour_detail' tour.id %}" 
+                                           class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                                            View Details
+                                        </a>
+                                        {% if user.is_authenticated and user.profile and user.profile.can_manage_parks %}
+                                            <a href="{% url 'tours:edit_tour' tour.id %}" 
+                                               class="px-4 py-3 text-green-600 border border-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                                                <i data-lucide="edit" class="w-4 h-4"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12 bg-gray-50 rounded-xl">
+                        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="compass" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Tours Available</h3>
+                        <p class="text-gray-600 mb-6">This park doesn't have any tours available yet.</p>
+                        {% if user.is_authenticated and user.profile and user.profile.can_manage_parks %}
+                            <a href="{% url 'tours:add_tour' %}?park={{ park.id }}" 
+                               class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                Create First Tour
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </section>
+            
+            <!-- Ratings & Reviews -->
+            <section class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="font-display text-3xl font-bold text-gray-900 mb-6 flex items-center space-x-3">
+                    <i data-lucide="star" class="w-8 h-8 text-green-600"></i>
+                    <span>Ratings & Reviews</span>
+                </h2>
+                
+                {% show_rating_breakdown park %}
+                
+                <div class="mt-6">
+                    {% show_specific_ratings park %}
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-100">
+                    {% show_rating_button park user %}
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-100">
+                    <h3 class="font-medium text-gray-900 mb-4">Recent Reviews</h3>
+                    {% show_recent_ratings park 5 %}
+                </div>
+            </section>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="space-y-6">
+                <!-- Park Info Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <h3 class="font-display text-xl font-bold text-gray-900 mb-4">Park Information</h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Basic Information -->
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600">Park Type:</span>
+                            <span class="font-medium">{{ park.get_park_type_display|default:"National Park" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600">Location:</span>
+                            <span class="font-medium">{{ park.location }}</span>
+                        </div>
+                        {% if park.date_established %}
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                                <span class="text-gray-600">Established:</span>
+                                <span class="font-medium">{{ park.date_established.year }}</span>
+                            </div>
+                        {% endif %}
+                        {% if park.area_sqkm %}
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                                <span class="text-gray-600">Area:</span>
+                                <span class="font-medium">{{ park.area_sqkm|floatformat:0 }} km²</span>
+                            </div>
+                        {% endif %}
+                        {% if park.altitude_m %}
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                                <span class="text-gray-600">Altitude:</span>
+                                <span class="font-medium">{{ park.altitude_m|floatformat:0 }}m above sea level</span>
+                            </div>
+                        {% endif %}
+                        <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                            <span class="text-gray-600">Total Tours:</span>
+                            <a href="{% url 'tours:tour_list' %}?park={{ park.id }}" class="font-medium hover:text-green-600 transition-colors cursor-pointer">
+                                {{ park.tours.count }}
+                            </a>
+                        </div>
+                        {% if min_price and max_price %}
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                                <span class="text-gray-600">Price Range:</span>
+                                <span class="font-medium text-green-600">
+                                    {% if min_price == max_price %}
+                                        ${{ min_price|floatformat:0 }}
+                                    {% else %}
+                                        ${{ min_price|floatformat:0 }} - ${{ max_price|floatformat:0 }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
+                        <div class="flex justify-between items-center py-3">
+                            <span class="text-gray-600">Rating:</span>
+                            <div class="flex items-center space-x-2">
+                                {% if park.ratings_count > 0 %}
+                                    {% display_star_rating park.average_rating size='sm' %}
+                                    <span class="text-sm text-gray-600">({{ park.ratings_count }})</span>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">No ratings yet</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Information -->
+                        {% if park.contact_phone or park.contact_email %}
+                            <div class="pt-4 border-t border-gray-100">
+                                <h4 class="font-semibold text-gray-900 mb-3">Contact Information</h4>
+                                {% if park.contact_phone %}
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <i data-lucide="phone" class="w-4 h-4 text-green-600"></i>
+                                        <a href="tel:{{ park.contact_phone }}" class="text-green-600 hover:text-green-700 transition-colors">
+                                            {{ park.contact_phone }}
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                {% if park.contact_email %}
+                                    <div class="flex items-center space-x-2">
+                                        <i data-lucide="mail" class="w-4 h-4 text-green-600"></i>
+                                        <a href="mailto:{{ park.contact_email }}" class="text-green-600 hover:text-green-700 transition-colors">
+                                            {{ park.contact_email }}
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    </div>
+                    
+                    {% if park.tours.all %}
+                        <div class="mt-6 pt-6 border-t border-gray-100">
+                            <a href="{% url 'tours:tour_list' %}?park={{ park.id }}" 
+                               class="block w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-center font-medium">
+                                Browse All Tours
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Featured Tours -->
+                {% if park.tours.all %}
+                <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <h3 class="font-display text-xl font-bold text-gray-900 mb-4">Featured Tours</h3>
+                    <div class="space-y-4">
+                        {% for tour in park.tours.all|slice:":2" %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-green-300 hover:shadow-md transition-all duration-200">
+                                <h4 class="font-semibold text-gray-900 mb-2">
+                                    <a href="{% url 'tours:tour_detail' tour.id %}" class="hover:text-green-600 transition-colors">
+                                        {{ tour.name }}
+                                    </a>
+                                </h4>
+                                <p class="text-sm text-gray-600 mb-3">{{ tour.description|truncatewords:12 }}</p>
+                                <div class="flex justify-between items-center text-sm">
+                                    <div class="flex items-center space-x-3 text-gray-500">
+                                        {% if tour.duration_hours %}
+                                            <span class="flex items-center">
+                                                <i data-lucide="clock" class="w-3 h-3 mr-1"></i>
+                                                {{ tour.duration_hours }}h
+                                            </span>
+                                        {% endif %}
+                                        {% if tour.max_participants %}
+                                            <span class="flex items-center">
+                                                <i data-lucide="users" class="w-3 h-3 mr-1"></i>
+                                                {{ tour.max_participants }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="font-semibold text-green-600">
+                                        ${{ tour.price|floatformat:0 }}
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <a href="{% url 'tours:tour_detail' tour.id %}" 
+                                       class="block w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-center text-sm font-medium">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        {% if park.tours.count > 2 %}
+                            <div class="pt-3 border-t border-gray-100">
+                                <a href="{% url 'tours:tour_list' %}?park={{ park.id }}" 
+                                   class="block w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center font-medium">
+                                    <i data-lucide="compass" class="w-4 h-4 inline mr-2"></i>
+                                    View All {{ park.tours.count }} Tours
+                                </a>
+                            </div>
+                        {% elif park.tours.count <= 2 %}
+                            <div class="pt-3 border-t border-gray-100">
+                                <a href="{% url 'tours:tour_list' %}?park={{ park.id }}" 
+                                   class="block w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-center font-medium">
+                                    <i data-lucide="compass" class="w-4 h-4 inline mr-2"></i>
+                                    View Tours
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conservation Notice -->
+<section class="bg-green-50 border-t border-green-200 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl p-8 shadow-lg border border-green-200">
+            <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <i data-lucide="leaf" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-gray-900 mb-2">Conservation & Sustainability</h3>
+                    <p class="text-gray-700 mb-4">
+                        Your visit to {{ park.name }} directly supports wildlife conservation efforts and local communities. 
+                        We are committed to sustainable tourism practices that protect Uganda's natural heritage for future generations.
+                    </p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Follow all park rules and guide instructions</li>
+                        <li>• Maintain respectful distances from wildlife</li>
+                        <li>• Support local communities through responsible tourism</li>
+                        <li>• Help preserve the environment for future visitors</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Month filter functionality (if needed for future enhancements)
+document.addEventListener('DOMContentLoaded', function() {
+    const monthFilter = document.getElementById('monthFilter');
+    const clearFilter = document.getElementById('clearMonthFilter');
+    
+    if (monthFilter) {
+        monthFilter.addEventListener('change', function() {
+            const selectedMonth = this.value;
+            if (selectedMonth) {
+                window.location.href = `?month=${selectedMonth}`;
+            } else {
+                window.location.href = window.location.pathname;
+            }
+        });
+    }
+    
+    if (clearFilter) {
+        clearFilter.addEventListener('click', function() {
+            window.location.href = window.location.pathname;
+        });
+    }
+});
+</script>
+{% endblock %}

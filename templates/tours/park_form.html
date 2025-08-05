@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - UWA Wildlife Tours{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center space-x-4 mb-4">
+                <a href="{% url 'tours:manage_parks' %}" class="text-safari-600 hover:text-safari-700">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+                    <p class="text-gray-600">
+                        {% if action == 'Add' %}
+                            Create a new national park or conservation area
+                        {% else %}
+                            Update park information and details
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form -->
+            <div class="lg:col-span-2">
+                <form method="post" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6 space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Park Name -->
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Park Name *
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Location -->
+                    <div>
+                        <label for="{{ form.location.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Location *
+                        </label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.location.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-gray-500 mt-1">e.g., Northern Uganda, Western Uganda, Central Uganda</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Description *
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-gray-500 mt-1">Describe the park's wildlife, attractions, and unique features</div>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div>
+                        <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Park Image
+                        </label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.image.errors.0 }}</div>
+                        {% endif %}
+                        {% if form.image.help_text %}
+                            <div class="text-xs text-gray-500 mt-1">{{ form.image.help_text }}</div>
+                        {% endif %}
+                        
+                        <!-- Current Image Preview -->
+                        {% if park and park.image %}
+                            <div class="mt-2">
+                                <div class="text-sm text-gray-500 mb-2">Current image:</div>
+                                <img src="{{ park.image.url }}" alt="{{ park.name }}" class="w-32 h-32 object-cover rounded-lg">
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Park Type -->
+                    <div>
+                        <label for="{{ form.park_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Park Type
+                        </label>
+                        {{ form.park_type }}
+                        {% if form.park_type.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.park_type.errors.0 }}</div>
+                        {% endif %}
+                        <div class="text-xs text-gray-500 mt-1">Select the type of protected area</div>
+                    </div>
+
+                    <!-- Detailed Information Section -->
+                    <div class="bg-gray-50 rounded-lg p-6 space-y-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+                            <i data-lucide="info" class="w-5 h-5 text-safari-600"></i>
+                            <span>Detailed Information</span>
+                        </h3>
+                        
+                        <!-- Grid for numeric fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Date Established -->
+                            <div>
+                                <label for="{{ form.date_established.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Date Established
+                                </label>
+                                {{ form.date_established }}
+                                {% if form.date_established.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ form.date_established.errors.0 }}</div>
+                                {% endif %}
+                                {% if form.date_established.help_text %}
+                                    <div class="text-xs text-gray-500 mt-1">{{ form.date_established.help_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Area -->
+                            <div>
+                                <label for="{{ form.area_sqkm.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Area (km²)
+                                </label>
+                                {{ form.area_sqkm }}
+                                {% if form.area_sqkm.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ form.area_sqkm.errors.0 }}</div>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-1">Total area in square kilometers</div>
+                            </div>
+
+                            <!-- Altitude -->
+                            <div>
+                                <label for="{{ form.altitude_m.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Altitude (meters)
+                                </label>
+                                {{ form.altitude_m }}
+                                {% if form.altitude_m.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ form.altitude_m.errors.0 }}</div>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-1">Average altitude above sea level</div>
+                            </div>
+
+                            <!-- Coordinates placeholder for spacing -->
+                            <div></div>
+
+                            <!-- Latitude -->
+                            <div>
+                                <label for="{{ form.latitude.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Latitude
+                                </label>
+                                {{ form.latitude }}
+                                {% if form.latitude.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ form.latitude.errors.0 }}</div>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-1">Decimal degrees (e.g., -0.5 for 0°30'S)</div>
+                            </div>
+
+                            <!-- Longitude -->
+                            <div>
+                                <label for="{{ form.longitude.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Longitude
+                                </label>
+                                {{ form.longitude }}
+                                {% if form.longitude.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ form.longitude.errors.0 }}</div>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-1">Decimal degrees (e.g., 29.833 for 29°50'E)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wildlife & Ecology Section -->
+                    <div class="bg-green-50 rounded-lg p-6 space-y-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+                            <i data-lucide="binoculars" class="w-5 h-5 text-green-600"></i>
+                            <span>Wildlife & Ecology</span>
+                        </h3>
+
+                        <!-- Key Wildlife -->
+                        <div>
+                            <label for="{{ form.key_wildlife.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Key Wildlife Species
+                            </label>
+                            {{ form.key_wildlife }}
+                            {% if form.key_wildlife.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.key_wildlife.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">List important wildlife species found in the park</div>
+                        </div>
+
+                        <!-- Vegetation Type -->
+                        <div>
+                            <label for="{{ form.vegetation_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Vegetation Types
+                            </label>
+                            {{ form.vegetation_type }}
+                            {% if form.vegetation_type.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.vegetation_type.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">Describe the vegetation types and plant species</div>
+                        </div>
+
+                        <!-- Key Features -->
+                        <div>
+                            <label for="{{ form.key_features.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Key Features & Geography
+                            </label>
+                            {{ form.key_features }}
+                            {% if form.key_features.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.key_features.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">Describe important physical features and attractions</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Section -->
+                    <div class="bg-blue-50 rounded-lg p-6 space-y-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+                            <i data-lucide="phone" class="w-5 h-5 text-blue-600"></i>
+                            <span>Contact Information</span>
+                        </h3>
+
+                        <!-- Contact fields in grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Contact Email -->
+                            <div>
+                                <label for="{{ form.contact_email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Contact Email
+                                </label>
+                                {{ form.contact_email }}
+                                {% if form.contact_email.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ form.contact_email.errors.0 }}</div>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-1">Official contact email for reservations</div>
+                            </div>
+
+                            <!-- Contact Phone -->
+                            <div>
+                                <label for="{{ form.contact_phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Contact Phone
+                                </label>
+                                {{ form.contact_phone }}
+                                {% if form.contact_phone.errors %}
+                                    <div class="text-red-600 text-sm mt-1">{{ form.contact_phone.errors.0 }}</div>
+                                {% endif %}
+                                <div class="text-xs text-gray-500 mt-1">Phone number for inquiries</div>
+                            </div>
+                        </div>
+
+                        <!-- Website URL -->
+                        <div>
+                            <label for="{{ form.website_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Official Website
+                            </label>
+                            {{ form.website_url }}
+                            {% if form.website_url.errors %}
+                                <div class="text-red-600 text-sm mt-1">{{ form.website_url.errors.0 }}</div>
+                            {% endif %}
+                            <div class="text-xs text-gray-500 mt-1">Official UWA page or park website</div>
+                        </div>
+                    </div>
+
+                    <!-- Form Errors -->
+                    {% if form.non_field_errors %}
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 text-red-800">
+                                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                                <span class="font-medium">Error</span>
+                            </div>
+                            <div class="mt-2 text-sm text-red-700">
+                                {{ form.non_field_errors.0 }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between pt-6 border-t border-gray-200">
+                        <a href="{% url 'tours:manage_parks' %}" 
+                           class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="px-6 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                            <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
+                            {% if action == 'Add' %}Create Park{% else %}Update Park{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Guidelines -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Park Guidelines</h3>
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="flex items-start space-x-2">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            <span>Use clear, descriptive names for parks</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            <span>Include key wildlife and attractions in description</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            <span>Upload high-quality landscape images</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            <span>Specify the general region or district</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="bg-blue-50 rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-blue-900 mb-4">💡 Pro Tips</h3>
+                    <div class="space-y-2 text-sm text-blue-800">
+                        <p>• Mention famous wildlife species found in the park</p>
+                        <p>• Include best visiting seasons or times</p>
+                        <p>• Highlight unique features or landmarks</p>
+                        <p>• Keep descriptions engaging and informative</p>
+                    </div>
+                </div>
+
+                {% if action == 'Edit' and park %}
+                    <!-- Park Stats -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Park Statistics</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Tours:</span>
+                                <span class="font-medium">{{ park.tours.count }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Created:</span>
+                                <span class="font-medium">{{ park.created_at|date:"M d, Y"|default:"N/A" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+<div class="rating-button mt-4">
+    {% if can_rate %}
+        <a href="{{ rating_url }}" class="px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors inline-flex items-center">
+            <i class="fas fa-star mr-2"></i>
+            {% if has_rated %}
+                Edit Your Review
+            {% else %}
+                Write a Review
+            {% endif %}
+        </a>
+    {% else %}
+        <a href="/accounts/login/?next={{ rating_url }}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors inline-flex items-center">
+            <i class="fas fa-star mr-2"></i>
+            Login to Review
+        </a>
+    {% endif %}
+</div>

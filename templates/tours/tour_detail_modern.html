@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load rating_tags %}
 
 {% block title %}{{ tour.name }} - Wildlife Tour in {{ tour.park.name }}{% endblock %}
 {% block description %}{{ tour.description|truncatewords:30 }} Experience this amazing wildlife tour in {{ tour.park.name }} with expert guides.{% endblock %}
@@ -35,12 +36,12 @@
                         {{ tour.park.name }}
                     </span>
                     <div class="flex items-center space-x-1 text-yellow-400">
-                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        <i data-lucide="star" class="w-5 h-5 fill-current"></i>
-                        <span class="text-white ml-2">(4.8/5 from 127 reviews)</span>
+                        {% display_star_rating tour.average_rating size='sm' %}
+                        {% if tour.ratings_count > 0 %}
+                            <span class="text-white ml-2">({{ tour.average_rating|floatformat:1 }}/5 from {{ tour.ratings_count }} reviews)</span>
+                        {% else %}
+                            <span class="text-white ml-2">(No reviews yet)</span>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -483,6 +484,79 @@
         </div>
     </div>
 </div>
+
+<!-- Ratings & Reviews Section -->
+<section class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-star text-yellow-400 mr-2"></i>
+                Ratings & Reviews
+            </h2>
+            <p class="text-xl text-gray-600">
+                See what other travelers are saying about this amazing experience
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Ratings Overview -->
+            <div class="space-y-8">
+                <!-- Rating Summary -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <div class="text-center mb-6">
+                        <div class="text-5xl font-bold text-gray-900 mb-2">
+                            {% if tour.ratings_count > 0 %}
+                                {{ tour.average_rating|floatformat:1 }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center justify-center mb-2">
+                            {% display_star_rating tour.average_rating size='lg' %}
+                        </div>
+                        <p class="text-gray-600">
+                            {% if tour.ratings_count > 0 %}
+                                Based on {{ tour.ratings_count }} review{{ tour.ratings_count|pluralize }}
+                            {% else %}
+                                No reviews yet
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <!-- Rating Breakdown -->
+                    <div class="space-y-3">
+                        {% show_rating_breakdown tour %}
+                    </div>
+                </div>
+                
+                <!-- Specific Ratings -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Rating Categories</h3>
+                    {% show_specific_ratings tour %}
+                </div>
+                
+                <!-- Add Rating Button -->
+                <div class="text-center">
+                    {% show_rating_button tour user %}
+                </div>
+            </div>
+            
+            <!-- Recent Reviews -->
+            <div class="space-y-6">
+                <h3 class="text-xl font-bold text-gray-900">Recent Reviews</h3>
+                {% show_recent_ratings tour 5 %}
+                
+                {% if tour.ratings_count > 5 %}
+                    <div class="text-center pt-6">
+                        <button class="px-6 py-3 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors font-medium">
+                            View All Reviews ({{ tour.ratings_count }})
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
 
 <!-- Similar Tours Section -->
 <section class="bg-gray-50 py-16">

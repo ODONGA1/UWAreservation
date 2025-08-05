@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Tours - UWA Wildlife Tours{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Tour Management</h1>
+                <p class="text-gray-600 mt-1">Manage all tours across Uganda's national parks</p>
+            </div>
+            <div class="flex space-x-3">
+                {% if user_can_manage_parks %}
+                    <a href="{% url 'tours:manage_parks' %}" 
+                       class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                        <i data-lucide="map" class="w-4 h-4 inline mr-2"></i>
+                        Manage Parks
+                    </a>
+                {% endif %}
+                <a href="{% url 'tours:add_tour' %}" 
+                   class="px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+                    Add New Tour
+                </a>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="searchTours" class="block text-sm font-medium text-gray-700 mb-1">Search Tours</label>
+                    <input type="text" id="searchTours" placeholder="Search by tour name..." 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label for="filterPark" class="block text-sm font-medium text-gray-700 mb-1">Filter by Park</label>
+                    <select id="filterPark" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                        <option value="">All Parks</option>
+                        {% for park in parks %}
+                            <option value="{{ park.name }}">{{ park.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="filterPrice" class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+                    <select id="filterPrice" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                        <option value="">All Prices</option>
+                        <option value="0-100">$0 - $100</option>
+                        <option value="100-500">$100 - $500</option>
+                        <option value="500-1000">$500 - $1000</option>
+                        <option value="1000+">$1000+</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filterDuration" class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                    <select id="filterDuration" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-safari-500 focus:border-transparent">
+                        <option value="">All Durations</option>
+                        <option value="1-8">Half/Full Day (1-8h)</option>
+                        <option value="24">1 Day (24h)</option>
+                        <option value="48-72">2-3 Days (48-72h)</option>
+                        <option value="168+">Week+ (168h+)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-safari-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="map" class="w-6 h-6 text-safari-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">{{ tours.count }}</div>
+                        <div class="text-sm text-gray-600">Total Tours</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="tree-pine" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">{{ parks.count }}</div>
+                        <div class="text-sm text-gray-600">Active Parks</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="dollar-sign" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">
+                            {% if tours %}
+                                ${{ average_price|floatformat:0 }}
+                            {% else %}
+                                $0
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-600">Avg. Price</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="clock" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-2xl font-bold text-gray-900">
+                            {% if tours %}
+                                {{ average_duration|floatformat:1 }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-600">Avg. Hours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tours Grid -->
+        <div id="toursGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for tour in tours %}
+                <div class="tour-card bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden" 
+                     data-tour-name="{{ tour.name|lower }}"
+                     data-park-name="{{ tour.park.name }}"
+                     data-price="{{ tour.price }}"
+                     data-duration="{{ tour.duration_hours }}">
+                    <!-- Tour Image -->
+                    <div class="relative h-48 bg-gray-200">
+                        {% if tour.image %}
+                            <img src="{{ tour.image.url }}" alt="{{ tour.name }}" 
+                                 class="w-full h-full object-cover">
+                        {% elif tour.park.image %}
+                            <img src="{{ tour.park.image.url }}" alt="{{ tour.park.name }}" 
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i data-lucide="image" class="w-12 h-12 text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Price Badge -->
+                        <div class="absolute top-3 right-3 bg-white bg-opacity-90 px-2 py-1 rounded-lg">
+                            <span class="text-sm font-bold text-gray-900">${{ tour.price }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Tour Content -->
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-lg">{{ tour.name }}</h3>
+                            <div class="flex space-x-1 ml-2">
+                                <a href="{% url 'tours:edit_tour' tour.id %}" 
+                                   class="p-1 text-safari-600 hover:bg-safari-50 rounded" title="Edit Tour">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </a>
+                                <button onclick="confirmDeleteTour({{ tour.id }}, '{{ tour.name|escapejs }}')"
+                                        class="p-1 text-red-600 hover:bg-red-50 rounded" title="Delete Tour">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Park Badge -->
+                        <div class="flex items-center mb-3">
+                            <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i>
+                                {{ tour.park.name }}
+                            </span>
+                        </div>
+
+                        <!-- Description -->
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ tour.description|truncatewords:15 }}</p>
+
+                        <!-- Tour Details -->
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="flex items-center text-gray-500">
+                                <i data-lucide="clock" class="w-4 h-4 mr-2"></i>
+                                <span>{{ tour.duration_hours }} hour{{ tour.duration_hours|pluralize }}</span>
+                            </div>
+                            <div class="flex items-center text-gray-500">
+                                <i data-lucide="users" class="w-4 h-4 mr-2"></i>
+                                <span>Max {{ tour.max_participants }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-4 pt-4 border-t border-gray-100">
+                            <div class="flex space-x-2">
+                                <a href="{% url 'tours:edit_tour' tour.id %}" 
+                                   class="flex-1 px-3 py-2 bg-safari-600 text-white text-sm rounded-lg hover:bg-safari-700 transition-colors text-center">
+                                    Edit Tour
+                                </a>
+                                <a href="{% url 'tours:park_detail' tour.park.id %}" 
+                                   class="px-3 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors">
+                                    View Park
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-span-full">
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="map" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Tours Found</h3>
+                        <p class="text-gray-600 mb-6">There are no tours available yet. Create your first tour to get started.</p>
+                        <a href="{% url 'tours:add_tour' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-safari-600 text-white rounded-lg hover:bg-safari-700 transition-colors">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                            Create First Tour
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Delete Tour</h3>
+        </div>
+        <p class="text-gray-600 mb-6">
+            Are you sure you want to delete <span id="tourNameToDelete" class="font-medium"></span>? 
+            This action cannot be undone.
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()" 
+                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                Cancel
+            </button>
+            <button id="confirmDelete" 
+                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                Delete Tour
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let tourToDelete = null;
+
+// Search and filter functionality
+function filterTours() {
+    const searchTerm = document.getElementById('searchTours').value.toLowerCase();
+    const parkFilter = document.getElementById('filterPark').value;
+    const priceFilter = document.getElementById('filterPrice').value;
+    const durationFilter = document.getElementById('filterDuration').value;
+    
+    const tourCards = document.querySelectorAll('.tour-card');
+    
+    tourCards.forEach(card => {
+        const tourName = card.dataset.tourName;
+        const parkName = card.dataset.parkName;
+        const price = parseFloat(card.dataset.price);
+        const duration = parseInt(card.dataset.duration);
+        
+        let show = true;
+        
+        // Search filter
+        if (searchTerm && !tourName.includes(searchTerm)) {
+            show = false;
+        }
+        
+        // Park filter
+        if (parkFilter && parkName !== parkFilter) {
+            show = false;
+        }
+        
+        // Price filter
+        if (priceFilter) {
+            if (priceFilter === '0-100' && (price < 0 || price > 100)) show = false;
+            if (priceFilter === '100-500' && (price < 100 || price > 500)) show = false;
+            if (priceFilter === '500-1000' && (price < 500 || price > 1000)) show = false;
+            if (priceFilter === '1000+' && price < 1000) show = false;
+        }
+        
+        // Duration filter
+        if (durationFilter) {
+            if (durationFilter === '1-8' && (duration < 1 || duration > 8)) show = false;
+            if (durationFilter === '24' && duration !== 24) show = false;
+            if (durationFilter === '48-72' && (duration < 48 || duration > 72)) show = false;
+            if (durationFilter === '168+' && duration < 168) show = false;
+        }
+        
+        card.style.display = show ? 'block' : 'none';
+    });
+}
+
+// Event listeners for filters
+document.getElementById('searchTours').addEventListener('input', filterTours);
+document.getElementById('filterPark').addEventListener('change', filterTours);
+document.getElementById('filterPrice').addEventListener('change', filterTours);
+document.getElementById('filterDuration').addEventListener('change', filterTours);
+
+// Delete functionality
+function confirmDeleteTour(tourId, tourName) {
+    tourToDelete = tourId;
+    document.getElementById('tourNameToDelete').textContent = tourName;
+    document.getElementById('deleteModal').classList.remove('hidden');
+    document.getElementById('deleteModal').classList.add('flex');
+}
+
+function closeDeleteModal() {
+    tourToDelete = null;
+    document.getElementById('deleteModal').classList.add('hidden');
+    document.getElementById('deleteModal').classList.remove('flex');
+}
+
+document.getElementById('confirmDelete').addEventListener('click', function() {
+    if (tourToDelete) {
+        fetch(`{% url 'tours:delete_tour' 0 %}`.replace('0', tourToDelete), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+                closeDeleteModal();
+            }
+        })
+        .catch(error => {
+            alert('An error occurred while deleting the tour.');
+            console.error('Error:', error);
+            closeDeleteModal();
+        });
+    }
+});
+
+// Close modal when clicking outside
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
+{% endblock %}

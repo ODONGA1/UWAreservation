@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-safari-700 to-green-600 py-6 px-6">
+            <h1 class="text-2xl font-bold text-white">{{ title }}</h1>
+            <p class="text-safari-100 mt-1">Share your experience with {{ object_name }}</p>
+        </div>
+        
+        <!-- Rating Form -->
+        <div class="p-6">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <!-- Overall Rating -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        {{ form.overall_rating.label }}
+                    </label>
+                    
+                    <div class="star-rating-container flex items-center" id="overallRatingStars">
+                        {% for i in "12345" %}
+                        <label class="cursor-pointer p-1">
+                            <input type="radio" name="overall_rating" value="{{ forloop.counter }}" 
+                                   class="hidden" 
+                                   {% if form.overall_rating.value == forloop.counter %}checked{% endif %}>
+                            <svg class="w-8 h-8 star-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 data-value="{{ forloop.counter }}">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                                </path>
+                            </svg>
+                        </label>
+                        {% endfor %}
+                        <span class="ml-2 text-sm text-gray-600" id="overallRatingText">Select rating</span>
+                    </div>
+                    
+                    {% if form.overall_rating.errors %}
+                        <p class="text-red-500 text-xs italic mt-1">{{ form.overall_rating.errors }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Optional Rating Categories -->
+                <div class="mb-6 space-y-6">
+                    <!-- Value Rating -->
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Value for Money
+                        </label>
+                        
+                        <div class="star-rating-container flex items-center" id="valueRatingStars">
+                            {% for i in "12345" %}
+                            <label class="cursor-pointer p-1">
+                                <input type="radio" name="value_rating" value="{{ forloop.counter }}" 
+                                       class="hidden"
+                                       {% if form.value_rating.value == forloop.counter %}checked{% endif %}>
+                                <svg class="w-6 h-6 star-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                     data-value="{{ forloop.counter }}">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                                    </path>
+                                </svg>
+                            </label>
+                            {% endfor %}
+                            <span class="ml-2 text-sm text-gray-600" id="valueRatingText">Optional</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Rating -->
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Quality of Service
+                        </label>
+                        
+                        <div class="star-rating-container flex items-center" id="serviceRatingStars">
+                            {% for i in "12345" %}
+                            <label class="cursor-pointer p-1">
+                                <input type="radio" name="service_rating" value="{{ forloop.counter }}" 
+                                       class="hidden"
+                                       {% if form.service_rating.value == forloop.counter %}checked{% endif %}>
+                                <svg class="w-6 h-6 star-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                     data-value="{{ forloop.counter }}">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                                    </path>
+                                </svg>
+                            </label>
+                            {% endfor %}
+                            <span class="ml-2 text-sm text-gray-600" id="serviceRatingText">Optional</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Cleanliness Rating -->
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Cleanliness
+                        </label>
+                        
+                        <div class="star-rating-container flex items-center" id="cleanlinessRatingStars">
+                            {% for i in "12345" %}
+                            <label class="cursor-pointer p-1">
+                                <input type="radio" name="cleanliness_rating" value="{{ forloop.counter }}" 
+                                       class="hidden"
+                                       {% if form.cleanliness_rating.value == forloop.counter %}checked{% endif %}>
+                                <svg class="w-6 h-6 star-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                     data-value="{{ forloop.counter }}">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                                    </path>
+                                </svg>
+                            </label>
+                            {% endfor %}
+                            <span class="ml-2 text-sm text-gray-600" id="cleanlinessRatingText">Optional</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Knowledge Rating -->
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Knowledge and Information Provided
+                        </label>
+                        
+                        <div class="star-rating-container flex items-center" id="knowledgeRatingStars">
+                            {% for i in "12345" %}
+                            <label class="cursor-pointer p-1">
+                                <input type="radio" name="knowledge_rating" value="{{ forloop.counter }}" 
+                                       class="hidden"
+                                       {% if form.knowledge_rating.value == forloop.counter %}checked{% endif %}>
+                                <svg class="w-6 h-6 star-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                     data-value="{{ forloop.counter }}">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                                    </path>
+                                </svg>
+                            </label>
+                            {% endfor %}
+                            <span class="ml-2 text-sm text-gray-600" id="knowledgeRatingText">Optional</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comment -->
+                <div class="mb-6">
+                    <label for="{{ form.comment.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
+                        Your Review
+                    </label>
+                    {{ form.comment }}
+                    {% if form.comment.errors %}
+                        <p class="text-red-500 text-xs italic mt-1">{{ form.comment.errors }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Photo Upload -->
+                <div class="mb-6">
+                    <label for="{{ form.photos.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
+                        Add Photos (Optional)
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" 
+                                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="{{ form.photos.id_for_label }}" class="relative cursor-pointer bg-white rounded-md font-medium text-safari-600 hover:text-safari-500 focus-within:outline-none">
+                                    <span>Upload photos</span>
+                                    {{ form.photos }}
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                PNG, JPG, GIF up to 5MB
+                            </p>
+                        </div>
+                    </div>
+                    <div id="preview-container" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                </div>
+
+                <!-- Existing Photos (Edit Mode) -->
+                {% if existing_photos %}
+                <div class="mb-6">
+                    <h3 class="block text-gray-700 text-sm font-bold mb-2">Your Existing Photos</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {% for photo in existing_photos %}
+                            <div class="relative group">
+                                <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}" class="w-full h-32 object-cover rounded-lg">
+                                <button type="button" 
+                                        class="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onclick="deletePhoto({{ photo.id }})">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Submit Button -->
+                <div class="flex items-center justify-between">
+                    <a href="javascript:history.back()" class="text-gray-600 hover:text-gray-800">
+                        Cancel
+                    </a>
+                    <button type="submit" class="bg-safari-600 hover:bg-safari-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                        Submit Rating
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize star ratings
+        initializeStarRatings();
+        
+        // Initialize image preview
+        initializeImagePreview();
+    });
+
+    function initializeStarRatings() {
+        const starContainers = document.querySelectorAll('.star-rating-container');
+        
+        starContainers.forEach(container => {
+            const stars = container.querySelectorAll('.star-icon');
+            const inputs = container.querySelectorAll('input[type="radio"]');
+            
+            // Check if any input is already selected
+            let selectedValue = 0;
+            inputs.forEach(input => {
+                if (input.checked) {
+                    selectedValue = parseInt(input.value);
+                }
+            });
+            
+            // Apply initial coloring
+            if (selectedValue > 0) {
+                updateStars(stars, selectedValue);
+                updateRatingText(container.id, selectedValue);
+            }
+            
+            // Set up event listeners
+            stars.forEach(star => {
+                star.addEventListener('mouseover', function() {
+                    const value = parseInt(this.dataset.value);
+                    updateStars(stars, value);
+                    updateRatingText(container.id, value);
+                });
+                
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.dataset.value);
+                    container.querySelector(`input[value="${value}"]`).checked = true;
+                });
+            });
+            
+            // Reset on mouseout if no selection
+            container.addEventListener('mouseleave', function() {
+                // Find if any radio is checked
+                let checkedValue = 0;
+                container.querySelectorAll('input[type="radio"]').forEach(input => {
+                    if (input.checked) {
+                        checkedValue = parseInt(input.value);
+                    }
+                });
+                
+                updateStars(stars, checkedValue);
+                updateRatingText(container.id, checkedValue);
+            });
+        });
+    }
+    
+    function updateStars(stars, value) {
+        stars.forEach(star => {
+            const starValue = parseInt(star.dataset.value);
+            if (starValue <= value) {
+                star.classList.add('text-yellow-400', 'fill-current');
+            } else {
+                star.classList.remove('text-yellow-400', 'fill-current');
+            }
+        });
+    }
+    
+    function updateRatingText(containerId, value) {
+        const textMappings = {
+            'overallRatingStars': {
+                element: 'overallRatingText',
+                texts: [
+                    "Select rating",
+                    "Poor - Not recommended",
+                    "Fair - Below average", 
+                    "Good - Average experience",
+                    "Very good - Above average",
+                    "Excellent - Highly recommend"
+                ]
+            },
+            'valueRatingStars': {
+                element: 'valueRatingText',
+                texts: [
+                    "Optional",
+                    "Poor value",
+                    "Fair value",
+                    "Good value",
+                    "Very good value",
+                    "Excellent value"
+                ]
+            },
+            'serviceRatingStars': {
+                element: 'serviceRatingText',
+                texts: [
+                    "Optional",
+                    "Poor service",
+                    "Fair service",
+                    "Good service",
+                    "Very good service",
+                    "Excellent service"
+                ]
+            },
+            'cleanlinessRatingStars': {
+                element: 'cleanlinessRatingText',
+                texts: [
+                    "Optional",
+                    "Poor cleanliness",
+                    "Fair cleanliness",
+                    "Good cleanliness",
+                    "Very good cleanliness",
+                    "Excellent cleanliness"
+                ]
+            },
+            'knowledgeRatingStars': {
+                element: 'knowledgeRatingText',
+                texts: [
+                    "Optional",
+                    "Poor knowledge",
+                    "Fair knowledge",
+                    "Good knowledge",
+                    "Very good knowledge",
+                    "Excellent knowledge"
+                ]
+            }
+        };
+        
+        const mapping = textMappings[containerId];
+        if (!mapping) return;
+        
+        const textElement = document.getElementById(mapping.element);
+        if (!textElement) return;
+        
+        textElement.textContent = mapping.texts[value] || mapping.texts[0];
+    }
+    
+    function initializeImagePreview() {
+        const input = document.querySelector('input[type="file"]');
+        const preview = document.getElementById('preview-container');
+        
+        if (!input || !preview) return;
+        
+        input.addEventListener('change', function() {
+            preview.innerHTML = '';
+            
+            if (this.files) {
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    
+                    // Validate file type and size
+                    if (!file.type.match('image.*')) {
+                        continue;
+                    }
+                    
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                        alert('File too large. Max size is 5MB.');
+                        continue;
+                    }
+                    
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const img = document.createElement('div');
+                        img.className = 'relative';
+                        img.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-32 object-cover rounded-lg" />
+                            <span class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                                ${file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name}
+                            </span>
+                        `;
+                        preview.appendChild(img);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    }
+    
+    function deletePhoto(photoId) {
+        if (!confirm("Are you sure you want to delete this photo? This cannot be undone.")) {
+            return;
+        }
+        
+        fetch(`{% url 'ratings:delete_rating_photo' 0 %}`.replace('0', photoId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Remove the photo from DOM
+                const photoElement = event.target.closest('.relative');
+                photoElement.remove();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete photo. Please try again.');
+        });
+    }
+</script>
+{% endblock %}

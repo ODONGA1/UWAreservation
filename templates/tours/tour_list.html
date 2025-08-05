@@ -47,6 +47,12 @@
         justify-content: center;
         color: white;
         font-size: 3em;
+        overflow: hidden;
+      }
+      .tour-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
       .tour-content {
         padding: 25px;
@@ -151,9 +157,10 @@
   </head>
   <body>
     <div class="container">
-      <div class="header">
+      <div class="header" style="background-image: linear-gradient(rgba(0,123,255,0.8), rgba(40,167,69,0.8)), url('{{ MEDIA_URL }}gallery/hero_uganda_landscape.jpg'); background-size: cover; background-position: center;">
         <h1>🦁 UWA Wildlife Tours</h1>
         <p>Discover Uganda's Amazing Wildlife Adventures</p>
+        <p style="margin-top: 20px; font-size: 1.1em;">Experience the Pearl of Africa's incredible biodiversity with authentic wildlife tours</p>
       </div>
 
       <div class="navigation">
@@ -167,15 +174,13 @@
       <div class="tours-grid">
         {% for tour in tours %}
         <div class="tour-card">
-          {% if tour.image %}
-          <img
-            src="{{ tour.image.url }}"
-            alt="{{ tour.name }}"
-            class="tour-image"
-          />
-          {% else %}
-          <div class="tour-image">🦁</div>
-          {% endif %}
+          <div class="tour-image">
+            {% if tour.image %}
+            <img src="{{ tour.image.url }}" alt="{{ tour.name }}" />
+            {% else %}
+            🦁
+            {% endif %}
+          </div>
 
           <div class="tour-content">
             <h2 class="tour-title">
@@ -186,6 +191,12 @@
 
             <div class="tour-info">
               📍 {{ tour.park.name }} {% if tour.duration %} • ⏰ {{ tour.duration }} hours {% endif %} {% if tour.max_participants %} • 👥 Max {{ tour.max_participants }} people {% endif %}
+            </div>
+            
+            <!-- Rating display -->
+            <div class="tour-rating" style="margin-bottom: 10px;">
+              {% load rating_tags %}
+              {% display_rating_summary tour %}
             </div>
 
             {% if tour.description %}
@@ -240,6 +251,50 @@
           <p>Check back later for exciting wildlife adventures!</p>
         </div>
         {% endfor %}
+      </div>
+
+      <!-- Wildlife Gallery Section -->
+      <div style="margin: 50px 0; text-align: center;">
+        <h2 style="color: #007bff; margin-bottom: 30px; font-size: 2em;">🦁 Uganda's Wildlife Gallery</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+          <div style="position: relative; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="{{ MEDIA_URL }}gallery/uganda_wildlife_1.jpg" alt="Mountain Gorillas" style="width: 100%; height: 200px; object-fit: cover;">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; padding: 20px; font-weight: bold;">Mountain Gorillas</div>
+          </div>
+          <div style="position: relative; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="{{ MEDIA_URL }}gallery/uganda_wildlife_2.jpg" alt="African Lions" style="width: 100%; height: 200px; object-fit: cover;">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; padding: 20px; font-weight: bold;">Tree-Climbing Lions</div>
+          </div>
+          <div style="position: relative; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="{{ MEDIA_URL }}gallery/uganda_wildlife_3.jpg" alt="African Elephants" style="width: 100%; height: 200px; object-fit: cover;">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; padding: 20px; font-weight: bold;">African Elephants</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+          <div style="position: relative; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="{{ MEDIA_URL }}gallery/uganda_landscape_1.jpg" alt="Murchison Falls" style="width: 100%; height: 250px; object-fit: cover;">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; padding: 20px; font-weight: bold;">Murchison Falls</div>
+          </div>
+          <div style="position: relative; overflow: hidden; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <img src="{{ MEDIA_URL }}gallery/uganda_landscape_2.jpg" alt="Uganda Forests" style="width: 100%; height: 250px; object-fit: cover;">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; padding: 20px; font-weight: bold;">Pristine Forests</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About UWA Section -->
+      <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 40px; border-radius: 15px; margin: 40px 0;">
+        <h2 style="color: #007bff; text-align: center; margin-bottom: 30px;">🛡️ About Uganda Wildlife Authority</h2>
+        <div style="max-width: 800px; margin: 0 auto; text-align: center; line-height: 1.6;">
+          <p style="font-size: 1.1em; margin-bottom: 20px;">
+            Uganda Wildlife Authority (UWA) is the government agency responsible for managing Uganda's wildlife conservation areas. 
+            We protect over 10 national parks and multiple wildlife reserves, safeguarding the incredible biodiversity of the Pearl of Africa.
+          </p>
+          <p style="font-size: 1em; color: #6c757d;">
+            From the endangered mountain gorillas in Bwindi to the magnificent tree-climbing lions in Queen Elizabeth National Park, 
+            our conservation efforts ensure these natural treasures are preserved for future generations.
+          </p>
+        </div>
       </div>
     </div>
   </body>
